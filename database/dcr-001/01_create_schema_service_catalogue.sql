@@ -12,7 +12,7 @@ AUTHORIZATION postgres;
 drop user IF EXISTS SERVICE_CATALOG_PROXY;
 
 -- Create the proxy user for Service Catalogue
-create user SERVICE_CATALOG_PROXY PASSWORD 'proxyPWD'; -- to be setup by DBA
+create user SERVICE_CATALOG_PROXY PASSWORD ''; -- to be setup by DBA
 -- Grant access to connect to the DB
 GRANT CONNECT on DATABASE plr_hs_catalog TO SERVICE_CATALOG_PROXY;
 
