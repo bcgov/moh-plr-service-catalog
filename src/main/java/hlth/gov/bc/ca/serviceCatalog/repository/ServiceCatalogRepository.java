@@ -15,7 +15,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
  */
 public interface ServiceCatalogRepository extends JpaRepository<ServiceCatalog, Long> {
     
-    List <ServiceCatalog> findByPublished(boolean published);
+    List <ServiceCatalog> findByLogicalId(long logicalId);
     List <ServiceCatalog> findByTitleContaining(String title);
     
 }

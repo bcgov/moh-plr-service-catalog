@@ -11,24 +11,27 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import lombok.Getter;
 
 /**
  *
  * @author camille.estival
  */
 @Entity
-@Table(name = "ServiceCatalog")
+@Table(name = "catalog_service")
+@Getter
 public class ServiceCatalog {
     
     
-        @Id
+    @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private long id;
+    @Column(name = "service_logical_id")
+    private long logicalId;
 
-    @Column(name = "title")
+    @Column(name = "service_name")
     private String title;
 
-    @Column(name = "description")
+    @Column(name = "service_desc_txt")
     private String description;
     
     public ServiceCatalog() {
@@ -37,7 +40,7 @@ public class ServiceCatalog {
     
     @Override
     public String toString() {
-		return "Tutorial [id=" + id + ", title=" + title + ", desc=" + description +" ]";
+		return "Service [id=" + logicalId + ", title=" + title + ", desc=" + description +" ]";
     }    
         
 }

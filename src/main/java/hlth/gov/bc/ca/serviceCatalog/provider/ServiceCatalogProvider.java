@@ -56,7 +56,7 @@ public class ServiceCatalogProvider implements IResourceProvider {
     
     @Override
     public Class<? extends IBaseResource> getResourceType() {
-        return CodeSystem.class;
+        return HealthcareService.class;
     }
 
     
@@ -86,8 +86,12 @@ public class ServiceCatalogProvider implements IResourceProvider {
         if (service == null) {
             throw new ResourceNotFoundException("Code System not found: "+id);
         }
-        
+        log.debug (service.toString());
         HealthcareService hs = new HealthcareService(); // tODO transform service to HS
+        hs.setActive(true);
+        hs.setName(service.getTitle());
+        hs.setComment(service.getDescription());
+        
         return hs;
     }
 
