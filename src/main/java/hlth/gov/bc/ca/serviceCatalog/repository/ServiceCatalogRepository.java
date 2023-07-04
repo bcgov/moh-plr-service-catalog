@@ -8,15 +8,17 @@ package hlth.gov.bc.ca.serviceCatalog.repository;
 import hlth.gov.bc.ca.serviceCatalog.entity.ServiceCatalog;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 /**
  *
  * @author camille.estival
  */
+@Repository
 public interface ServiceCatalogRepository extends JpaRepository<ServiceCatalog, Long> {
     
-    List <ServiceCatalog> findByLogicalId(long logicalId);
-    List <ServiceCatalog> findByTitleContaining(String title);
+    ServiceCatalog findByLogicalId(long logicalId);
+    List <ServiceCatalog> findByNameContaining(String name);
     
 }
 

@@ -11,37 +11,35 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import hlth.gov.bc.ca.serviceCatalog.ServiceCatalogConstant;
 import hlth.gov.bc.ca.serviceCatalog.entity.ServiceCatalog;
 import hlth.gov.bc.ca.serviceCatalog.repository.ServiceCatalogRepository;
-import java.sql.Timestamp;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.map.PassiveExpiringMap;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.text.CaseUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.HealthcareService;
 import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 /**
  *
  * @author camille.estival
  */
 @Component
-public class ServiceCatalogProvider implements IResourceProvider {
+public class ServiceCatalogProvider implements IResourceProvider{
     
     private static final Logger log = LoggerFactory.getLogger(ServiceCatalogProvider.class);
     
@@ -58,6 +56,7 @@ public class ServiceCatalogProvider implements IResourceProvider {
     public Class<? extends IBaseResource> getResourceType() {
         return HealthcareService.class;
     }
+    
 
     
     @Read()
@@ -80,18 +79,45 @@ public class ServiceCatalogProvider implements IResourceProvider {
 
 
    protected HealthcareService getServiceById(String id) throws ResourceNotFoundException {
-//        manageCSCache();
         
-        ServiceCatalog service = serviceCatalogRepo.getReferenceById(new Long(id));
+        ServiceCatalog service = serviceCatalogRepo.findByLogicalId(new Long(id));
         if (service == null) {
             throw new ResourceNotFoundException("Code System not found: "+id);
         }
         log.debug (service.toString());
-        HealthcareService hs = new HealthcareService(); // tODO transform service to HS
+        return getHealthcareService(service);
+    }
+
+    public HealthcareService getHealthcareService(ServiceCatalog service)  {
+
+        HealthcareService hs = new HealthcareService();
         hs.setActive(true);
-        hs.setName(service.getTitle());
+        hs.setName(service.getName());
         hs.setComment(service.getDescription());
         
+        hs.addCategory(new CodeableConcept(new Coding("https://terminology.hlth.gov.bc.ca/ProviderLocationRegistry/CodeSystem/bc-service-type-code-system", "catalogue","")));
+        
+        List <Identifier> listIdentifier = new ArrayList();
+        Identifier logicalId  = new Identifier();
+        logicalId.setId(Long.toString(service.getLogicalId()));
+        logicalId.setSystem(service.getSystem().getSystemCode());
+        listIdentifier.add(logicalId);
+        Identifier externalId  = new Identifier();
+        externalId.setId(service.getExternalIdentifier());
+        externalId.setSystem("external");
+        listIdentifier.add(externalId);
+        hs.setIdentifier(listIdentifier);
+        if(service.getParentService()!=null){
+            List <Extension> extensionList = new ArrayList<>();
+            Extension offeredIn = new Extension("http://hl7.org/fhir/5.0/StructureDefinition/extension-HealthcareService.offeredIn");
+            offeredIn.setId("offeredIn");
+//            offeredIn.setValue(getHealthcareService(service.getParentService()));
+// TODO or should it be a Reference?
+            offeredIn.setUserData("offeredIn", getHealthcareService(service.getParentService()));
+            extensionList.add(offeredIn);
+            hs.setExtension(extensionList);
+        }
+
         return hs;
     }
 
