@@ -18,6 +18,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import lombok.Getter;
+import lombok.Setter;
 
 /**
  *
@@ -26,6 +27,7 @@ import lombok.Getter;
 @Entity
 @Table(name = "catalog_service", schema="plr_hs_catalog")
 @Getter
+@Setter
 public class ServiceCatalog {
     
     

@@ -64,33 +64,29 @@ public class ServiceCatalogProvider implements IResourceProvider{
         return getServiceById(theId.getIdPart());
     }
 
-//    @Search
-//    public List<CodeSystem> search(@OptionalParam(name = CodeSystem.SP_URL) StringParam url,
-//            @OptionalParam(name = CodeSystem.SP_NAME) StringParam name,
-//            @OptionalParam(name = CodeSystem.SP_TITLE) StringParam title ) {
-//        
-//        return this.search(ifNullParam(url), 
-//                ifNullParam(name),
-//                ifNullParam(title));
-//    }
-
-
-
-
-
-   protected HealthcareService getServiceById(String id) throws ResourceNotFoundException {
+    // TODO need to add search by service Type, specialty, ExternalIdentifier, System and Parent
+    @Search
+    public List<HealthcareService> search(
+            @OptionalParam(name = HealthcareService.SP_NAME) StringParam name,
+            @OptionalParam(name = HealthcareService.SP_IDENTIFIER) StringParam identifier ) {
         
+        return this.search(ifNullParam(name));
+    }
+
+
+    private HealthcareService getServiceById(String id) throws ResourceNotFoundException {
         ServiceCatalog service = serviceCatalogRepo.findByLogicalId(new Long(id));
         if (service == null) {
             throw new ResourceNotFoundException("Code System not found: "+id);
         }
         log.debug (service.toString());
-        return getHealthcareService(service);
+        return transformToHealthcareService(service);
     }
 
-    public HealthcareService getHealthcareService(ServiceCatalog service)  {
+    private HealthcareService transformToHealthcareService(ServiceCatalog service)  {
 
         HealthcareService hs = new HealthcareService();
+        hs.setId(Long.toString(service.getLogicalId()));
         hs.setActive(true);
         hs.setName(service.getName());
         hs.setComment(service.getDescription());
@@ -100,7 +96,7 @@ public class ServiceCatalogProvider implements IResourceProvider{
         List <Identifier> listIdentifier = new ArrayList();
         Identifier logicalId  = new Identifier();
         logicalId.setId(Long.toString(service.getLogicalId()));
-        logicalId.setSystem(service.getSystem().getSystemCode());
+        logicalId.setSystem(service.getSystem().getCode());
         listIdentifier.add(logicalId);
         Identifier externalId  = new Identifier();
         externalId.setId(service.getExternalIdentifier());
@@ -113,7 +109,7 @@ public class ServiceCatalogProvider implements IResourceProvider{
             offeredIn.setId("offeredIn");
 //            offeredIn.setValue(getHealthcareService(service.getParentService()));
 // TODO or should it be a Reference?
-            offeredIn.setUserData("offeredIn", getHealthcareService(service.getParentService()));
+            offeredIn.setUserData("offeredIn", transformToHealthcareService(service.getParentService()));
             extensionList.add(offeredIn);
             hs.setExtension(extensionList);
         }
@@ -121,127 +117,37 @@ public class ServiceCatalogProvider implements IResourceProvider{
         return hs;
     }
 
-//    private CodeSystem getCodeSystemBySystem(String system) throws InternalErrorException, ResourceNotFoundException {
-//        
-//        if (system != null && !system.isBlank()) {
-//            String[] systemSplit = system.split("/");
-//            String theId = systemSplit[systemSplit.length - 1];
-//            if (!theId.isEmpty()) {
-//               return getCodeSystemById(theId);
-//            }
-//        }
-//        throw new InvalidRequestException("Parameter 'system' is mandatory if resource ID is not specified.");
-//    }
     
-    private List<CodeSystem> search(String url, String name, String title){
-        // load cached Map
-//        manageCSCache();
+    private List<HealthcareService> search(String name){
+        
+        List <ServiceCatalog> listService = serviceCatalogRepo.findByName(name);
+        
+        log.debug ("how many service found by name:"+listService.size());
+        
+        return transformList(listService);
+        
+    }
+
+    public List<HealthcareService> transformList(List<ServiceCatalog> listService) {
+        List <HealthcareService> healhcareServiceList = new ArrayList<>();
+        HealthcareService hs;
+        for (ServiceCatalog service : listService) {
+            hs = transformToHealthcareService(service);
+            healhcareServiceList.add (hs);
+        }
+        return healhcareServiceList;
         
         // Loop through the patients looking for matches
-         List<CodeSystem> codesList = codeSystemMap.values()
-                .stream()
-                .filter(next -> searchBy(url, next.getUrl()) )
-                .filter(next -> searchBy(name, next.getName()) )
-                .filter(next -> searchBy(title, next.getTitle()) )
-                .collect(Collectors.toList());
-        return codesList;
+//         List<CodeSystem> codesList = codeSystemMap.values()
+//                .stream()
+//                .filter(next -> searchBy(url, next.getUrl()) )
+//                .filter(next -> searchBy(name, next.getName()) )
+//                .filter(next -> searchBy(title, next.getTitle()) )
+//                .collect(Collectors.toList());
+//        return codesList;
     }
-    
-    private void isCodeParamEmpty(String code) throws InvalidRequestException {
-        if(code == null || code.isBlank()){
-            throw new InvalidRequestException("The parameter 'code' is mandatory for the lookup operation");
-        }
-    }
-        
-    /** 
-     * load a cache with the codeSytem resource
-     * Called in search and getBy ID
-     */
-//    private void manageCSCache() {
-//        
-//        log.info("start manageCacheCS method");
-//        if (codeSystemMap.isEmpty() || codeSystemMap.size()!= ServiceCatalogConstant.PLR_CODE_SYSTEM_MAP.size()){
-//            
-//            log.info("CS map is empty or not complete, codeSystemMap.size:" +codeSystemMap.size());
-//            
-//            for (String id : ServiceCatalogConstant.PLR_CODE_SYSTEM_MAP.keySet()) {
-//                if (codeSystemMap.get(id) == null) {
-//                    try {
-//                        codeSystemMap.put(id, loadCodeSystemById(id));
-//                        log.info("add CS to map for id : " +id);
-//                    } catch (ResourceNotFoundException e){
-//                        log.error("query result not found for id : " +id);
-//                    } catch (DataAccessException e){
-//                        log.error("There is an issue with the DB query with this Code System: " +id);
-//                    }
-//                }
-//            }
-//        }
-//        log.info("manageCacheCS method exit");
-//    }
-    
-//    private CodeSystem loadCodeSystemById(String theId) throws DataAccessException, ResourceNotFoundException {        
-//        CodeSystem cs;
-//        
-//        List<Map<String, Object>> resultList = getQueryResult(StringUtils.lowerCase(theId));
-//        if (resultList == null) {
-//            log.debug("query result KO or this ID does not exist");
-//            throw new ResourceNotFoundException(theId);
-//        } else {
-//                cs = new CodeSystem();
-//                cs.setId(theId);
-//                cs.setUrl(ServiceCatalogConstant.URL + "CodeSystem/" + theId);
-//                cs.setName(CaseUtils.toCamelCase(theId.replace("-", " "), true));
-//                cs.setTitle(CaseUtils.toCamelCase(theId.replace("-", " "), true));
-//                cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
-//                cs.setPublisher("Government of British Columbia");
-//                cs.setJurisdiction(Collections.singletonList(ServiceCatalogConstant.JURISDICTION_CAN));
-//                
-//            for (Map m : resultList) {
-//                if (cs.getDate() == null){
-//                        // Add date to CS based on latest code added/edited in DB (aka first from the list)
-//                        cs.setDate((Timestamp) m.get("EFFECTIVE_START_DATE"));
-//                }
-//                CodeSystem.ConceptDefinitionComponent cdc = new CodeSystem.ConceptDefinitionComponent();
-//                cdc.setCode((String) m.get("CTL_NAME_CODE"));
-//                cdc.setDisplay((String) m.get("CTL_DESC_TXT"));
-//                    
-//                if (theId.matches("bc-expertise-code-system") && m.get("PROV_ROLE_TYPE") != null) {
-//                        cdc.setDefinition("Only applicable for the following roles: " + ((String) m.get("PROV_ROLE_TYPE")));
-//                }
-//                if (theId.matches("bc-credential-code-system") && m.get("PROV_ROLE_TYPE") != null) {
-//                        cdc.setDefinition("Only applicable for the following roles: " + ((String) m.get("PROV_ROLE_TYPE")));
-//                }
-//                cs.addConcept(cdc);
-//            }
-//            this.codeSystemMap.put(theId, cs);
-//        }
-//        return cs;
-//    }
-    
-    /**
-     * Load the query results 
-     * @param csId
-     * @return
-     * @throws InternalErrorException 
-     */
-//    private List<Map<String, Object>> getQueryResult(String csId) throws InternalErrorException {
-//        
-//        log.debug("getQueryResult by id :" + csId);
-//        if (ServiceCatalogConstant.PLR_CODE_SYSTEM_MAP.get(csId)!= null) {
-//            List<Map<String, Object>> list; 
-//        
-//                try {
-//                    list = jdbcTemplate.queryForList(ServiceCatalogConstant.PLR_CODE_SYSTEM_MAP.get(csId));
-//                } catch (DataAccessException e){
-//                    throw new InternalErrorException("DB query failed", e);
-//                }
-//                log.debug("query ok :" + list.size());
-//            return list;
-//        } else {
-//            throw new ResourceNotFoundException("This Code System is not part of PLR Code System:" +csId);
-//        }
-//    }
+
+
 
     // TODO this 2 should be Utils method
     private static boolean searchBy(String param, String csValue) {

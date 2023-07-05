@@ -18,6 +18,10 @@ import org.springframework.stereotype.Repository;
 public interface ServiceCatalogRepository extends JpaRepository<ServiceCatalog, Long> {
     
     ServiceCatalog findByLogicalId(long logicalId);
+    ServiceCatalog findByExternalIdentifierAndSystem(String externalIdentifier, String systemCode);
+    List <ServiceCatalog> findBySystemCode(String systemCode);
+    List <ServiceCatalog> findByName(String name);
+//    List <ServiceCatalog> findByParent(String parentLogicalId);
     List <ServiceCatalog> findByNameContaining(String name);
     
 }

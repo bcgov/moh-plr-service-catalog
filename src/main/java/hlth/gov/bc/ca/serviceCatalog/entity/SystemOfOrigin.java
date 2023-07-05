@@ -32,7 +32,7 @@ public class SystemOfOrigin {
     private long systemId;
 
     @Column(name = "system_cd")
-    private String systemCode;
+    private String code;
 
     @Column(name = "system_desc_txt")
     private String description;
@@ -55,7 +55,7 @@ public class SystemOfOrigin {
     
     @Override
     public String toString() {
-		return "Tutorial [id=" + systemId + ", code=" + systemCode + ", desc=" + description +", URL=" + systemUrl +" ]";
+		return "Tutorial [id=" + systemId + ", code=" + code + ", desc=" + description +", URL=" + systemUrl +" ]";
     }    
         
 }
