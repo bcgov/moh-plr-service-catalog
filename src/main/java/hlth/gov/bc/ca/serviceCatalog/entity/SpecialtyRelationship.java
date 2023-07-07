@@ -13,6 +13,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -40,7 +41,7 @@ public class SpecialtyRelationship {
     @JoinColumn(name = "code_system_id")
     private SystemOfOrigin codeSystem;
     
-    @OneToOne(fetch = FetchType.LAZY) // lazy as we will not use this relationship from there
+    @ManyToOne
     @JoinColumn(name = "catalog_service_id")
     private ServiceCatalog service;
 
@@ -52,14 +53,14 @@ public class SpecialtyRelationship {
     @Temporal(value = TemporalType.DATE)
     private Date endDate;
     
-    
     public SpecialtyRelationship() {
-    
     }
     
     @Override
     public String toString() {
-		return "SpecialtyRelationship [id=" + specialtyRelationId + ", code=" + lookupCode + ", serviceID=" +", codeSystemURL=" + codeSystem.getCode() +" ]";
+	return "SpecialtyRelationship [id=" + specialtyRelationId 
+                + ", code=" + lookupCode 
+                + ", serviceID=" 
+                + ", codeSystemURL=" + codeSystem.getCode() +" ]";
     }    
-        
 }

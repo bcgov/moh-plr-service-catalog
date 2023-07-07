@@ -25,7 +25,6 @@ import lombok.Getter;
 @Getter
 public class SystemOfOrigin {
     
-    
     @Id
     @Column(name = "system_id")
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -48,9 +47,7 @@ public class SystemOfOrigin {
     @Temporal(value = TemporalType.DATE)
     private Date endDate;
     
-    
     public SystemOfOrigin() {
-    
     }
     
     @Override

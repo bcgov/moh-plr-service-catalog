@@ -1,8 +1,6 @@
 package hlth.gov.bc.ca.serviceCatalog.provider;
 
 import ca.uhn.fhir.rest.annotation.IdParam;
-import ca.uhn.fhir.rest.annotation.Operation;
-import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Search;
@@ -12,10 +10,12 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import hlth.gov.bc.ca.serviceCatalog.entity.ServiceCatalog;
+import hlth.gov.bc.ca.serviceCatalog.entity.ServiceTypeRelationship;
+import hlth.gov.bc.ca.serviceCatalog.entity.SpecialtyRelationship;
 import hlth.gov.bc.ca.serviceCatalog.repository.ServiceCatalogRepository;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Set;
 import org.apache.commons.collections4.map.PassiveExpiringMap;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -30,9 +30,7 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
 /**
  *
@@ -42,9 +40,6 @@ import org.springframework.stereotype.Service;
 public class ServiceCatalogProvider implements IResourceProvider{
     
     private static final Logger log = LoggerFactory.getLogger(ServiceCatalogProvider.class);
-    
-//    @Autowired
-//    JdbcTemplate jdbcTemplate;
     
     @Autowired
     ServiceCatalogRepository serviceCatalogRepo;
@@ -56,8 +51,6 @@ public class ServiceCatalogProvider implements IResourceProvider{
     public Class<? extends IBaseResource> getResourceType() {
         return HealthcareService.class;
     }
-    
-
     
     @Read()
     public HealthcareService read(@IdParam IdType theId) {
@@ -93,8 +86,10 @@ public class ServiceCatalogProvider implements IResourceProvider{
         
         hs.addCategory(new CodeableConcept(new Coding("https://terminology.hlth.gov.bc.ca/ProviderLocationRegistry/CodeSystem/bc-service-type-code-system", "catalogue","")));
         
-        buildIdentifiersLidt(service, hs);
-        
+        buildIdentifiersList(service, hs);
+        buildSpecialtyList(service.getSpecialtyRelationship(), hs);
+        buildTypeList(service.getServiceTypeRelationship(), hs);
+
         if(service.getParentService()!=null){
             List <Extension> extensionList = new ArrayList<>();
             Extension offeredIn = new Extension("http://hl7.org/fhir/5.0/StructureDefinition/extension-HealthcareService.offeredIn");
@@ -109,7 +104,7 @@ public class ServiceCatalogProvider implements IResourceProvider{
         return hs;
     }
 
-    public void buildIdentifiersLidt(ServiceCatalog service, HealthcareService hs) {
+    private void buildIdentifiersList(ServiceCatalog service, HealthcareService hs) {
         List <Identifier> listIdentifier = new ArrayList();
         Identifier logicalId  = new Identifier();
         logicalId.setId(Long.toString(service.getLogicalId()));
@@ -122,31 +117,42 @@ public class ServiceCatalogProvider implements IResourceProvider{
         hs.setIdentifier(listIdentifier);
     }
 
-    public void buildServiceTypeList(ServiceCatalog service, HealthcareService hs) {
-        
-        List <Identifier> listIdentifier = new ArrayList();
-        Identifier logicalId  = new Identifier();
-        logicalId.setId(Long.toString(service.getLogicalId()));
-        logicalId.setSystem(service.getSystem().getCode());
-        listIdentifier.add(logicalId);
-        Identifier externalId  = new Identifier();
-        externalId.setId(service.getExternalIdentifier());
-        externalId.setSystem("external");
-        listIdentifier.add(externalId);
-        hs.setIdentifier(listIdentifier);
+    private void buildSpecialtyList(Set <SpecialtyRelationship> specialtyRelList, HealthcareService hs) {
+        List <CodeableConcept> specialtyList= new ArrayList();
+        CodeableConcept specialtyCode;
+        Coding code;
+        if(!specialtyRelList.isEmpty()){
+            for (SpecialtyRelationship specialtyRel : specialtyRelList) {
+                code = new Coding(specialtyRel.getCodeSystem().getSystemUrl(), specialtyRel.getLookupCode(), "TODO call to get display value");
+                specialtyCode= new CodeableConcept(code);
+                specialtyList.add(specialtyCode);
+            }
+        }
+        hs.setSpecialty(specialtyList);
+    }
+    
+    private void buildTypeList(Set <ServiceTypeRelationship> typeRelList, HealthcareService hs) {
+        List <CodeableConcept> typeList= new ArrayList();
+        CodeableConcept typeCode;
+        Coding code;
+        if(!typeRelList.isEmpty()){
+            for (ServiceTypeRelationship typeRel : typeRelList) {
+                code = new Coding(typeRel.getCodeSystem().getSystemUrl(), typeRel.getLookupCode(), "TODO call to get display value");
+                typeCode = new CodeableConcept(code);
+                typeList.add(typeCode);
+            }
+        }
+        hs.setType(typeList);
     }
         
     private List<HealthcareService> search(String name){
         
         List <ServiceCatalog> listService = serviceCatalogRepo.findByName(name);
-        
         log.debug ("how many service found by name:"+listService.size());
-        
         return transformList(listService);
-        
     }
 
-    public List<HealthcareService> transformList(List<ServiceCatalog> listService) {
+    private List<HealthcareService> transformList(List<ServiceCatalog> listService) {
         List <HealthcareService> healhcareServiceList = new ArrayList<>();
         HealthcareService hs;
         for (ServiceCatalog service : listService) {

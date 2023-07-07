@@ -6,30 +6,23 @@
 package hlth.gov.bc.ca.serviceCatalog.entity;
 
 import java.util.Date;
-import java.util.List;
 import java.util.Set;
-import javax.annotation.Nullable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.validation.constraints.Null;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
-import org.springframework.data.relational.core.mapping.Embedded;
 
 /**
  *
@@ -38,7 +31,7 @@ import org.springframework.data.relational.core.mapping.Embedded;
 @Entity
 @Table(name = "catalog_service", schema="plr_hs_catalog")
 @Getter
-@Setter
+//@Setter
 public class ServiceCatalog {
     
     
@@ -84,18 +77,17 @@ public class ServiceCatalog {
     private Date endDate;
     
     @OneToMany(mappedBy = "service")
-//    @LazyCollection(LazyCollectionOption.FALSE) 
-    @Fetch(value = FetchMode.SUBSELECT)
+    @LazyCollection(LazyCollectionOption.FALSE) 
+//    @Fetch(value = FetchMode.SUBSELECT)
     private Set<ServiceTypeRelationship> serviceTypeRelationship;
     
-    @OneToMany(mappedBy = "service")
-//    @LazyCollection(LazyCollectionOption.FALSE) 
-    @Fetch(value = FetchMode.SUBSELECT)
+    @OneToMany(mappedBy = "service", fetch = FetchType.EAGER)
+//    @LazyCollection(LazyCollectionOption.FALSE) // TODO find out which one is safer to eagerly retrieve these lists
+//    @Fetch(value = FetchMode.SUBSELECT)
     private Set<SpecialtyRelationship> specialtyRelationship;
     
     
     public ServiceCatalog() {
-    
     }
     
     @Override
