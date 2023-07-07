@@ -93,16 +93,8 @@ public class ServiceCatalogProvider implements IResourceProvider{
         
         hs.addCategory(new CodeableConcept(new Coding("https://terminology.hlth.gov.bc.ca/ProviderLocationRegistry/CodeSystem/bc-service-type-code-system", "catalogue","")));
         
-        List <Identifier> listIdentifier = new ArrayList();
-        Identifier logicalId  = new Identifier();
-        logicalId.setId(Long.toString(service.getLogicalId()));
-        logicalId.setSystem(service.getSystem().getCode());
-        listIdentifier.add(logicalId);
-        Identifier externalId  = new Identifier();
-        externalId.setId(service.getExternalIdentifier());
-        externalId.setSystem("external");
-        listIdentifier.add(externalId);
-        hs.setIdentifier(listIdentifier);
+        buildIdentifiersLidt(service, hs);
+        
         if(service.getParentService()!=null){
             List <Extension> extensionList = new ArrayList<>();
             Extension offeredIn = new Extension("http://hl7.org/fhir/5.0/StructureDefinition/extension-HealthcareService.offeredIn");
@@ -117,7 +109,33 @@ public class ServiceCatalogProvider implements IResourceProvider{
         return hs;
     }
 
-    
+    public void buildIdentifiersLidt(ServiceCatalog service, HealthcareService hs) {
+        List <Identifier> listIdentifier = new ArrayList();
+        Identifier logicalId  = new Identifier();
+        logicalId.setId(Long.toString(service.getLogicalId()));
+        logicalId.setSystem(service.getSystem().getCode());
+        listIdentifier.add(logicalId);
+        Identifier externalId  = new Identifier();
+        externalId.setId(service.getExternalIdentifier());
+        externalId.setSystem("external");
+        listIdentifier.add(externalId);
+        hs.setIdentifier(listIdentifier);
+    }
+
+    public void buildServiceTypeList(ServiceCatalog service, HealthcareService hs) {
+        
+        List <Identifier> listIdentifier = new ArrayList();
+        Identifier logicalId  = new Identifier();
+        logicalId.setId(Long.toString(service.getLogicalId()));
+        logicalId.setSystem(service.getSystem().getCode());
+        listIdentifier.add(logicalId);
+        Identifier externalId  = new Identifier();
+        externalId.setId(service.getExternalIdentifier());
+        externalId.setSystem("external");
+        listIdentifier.add(externalId);
+        hs.setIdentifier(listIdentifier);
+    }
+        
     private List<HealthcareService> search(String name){
         
         List <ServiceCatalog> listService = serviceCatalogRepo.findByName(name);

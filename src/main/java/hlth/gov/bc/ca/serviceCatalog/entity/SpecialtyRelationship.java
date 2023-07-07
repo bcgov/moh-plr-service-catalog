@@ -8,9 +8,12 @@ package hlth.gov.bc.ca.serviceCatalog.entity;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -21,24 +24,25 @@ import lombok.Getter;
  * @author camille.estival
  */
 @Entity
-@Table(name = "hs_system_of_origin", schema="plr_hs_catalog")
+@Table(name = "specialty_rel", schema="plr_hs_catalog")
 @Getter
-public class SystemOfOrigin {
-    
+public class SpecialtyRelationship {
     
     @Id
-    @Column(name = "system_id")
+    @Column(name = "specialty_rel_id")
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private long systemId;
+    private long specialtyRelationId;
 
-    @Column(name = "system_cd")
-    private String code;
+    @Column(name = "specialty_lookup_cd")
+    private String lookupCode;
 
-    @Column(name = "system_desc_txt")
-    private String description;
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "code_system_id")
+    private SystemOfOrigin codeSystem;
     
-    @Column(name = "system_lookup_url")
-    private String systemUrl;
+    @OneToOne(fetch = FetchType.LAZY) // lazy as we will not use this relationship from there
+    @JoinColumn(name = "catalog_service_id")
+    private ServiceCatalog service;
 
     @Column(name = "effective_start_dt")
     @Temporal(value = TemporalType.DATE)
@@ -49,13 +53,13 @@ public class SystemOfOrigin {
     private Date endDate;
     
     
-    public SystemOfOrigin() {
+    public SpecialtyRelationship() {
     
     }
     
     @Override
     public String toString() {
-		return "SystemOfOrigin [id=" + systemId + ", code=" + code + ", desc=" + description +", URL=" + systemUrl +" ]";
+		return "SpecialtyRelationship [id=" + specialtyRelationId + ", code=" + lookupCode + ", serviceID=" +", codeSystemURL=" + codeSystem.getCode() +" ]";
     }    
         
 }

@@ -6,6 +6,9 @@
 package hlth.gov.bc.ca.serviceCatalog.entity;
 
 import java.util.Date;
+import java.util.List;
+import java.util.Set;
+import javax.annotation.Nullable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -13,12 +16,20 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.Null;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
+import org.springframework.data.relational.core.mapping.Embedded;
 
 /**
  *
@@ -72,13 +83,24 @@ public class ServiceCatalog {
     @Temporal(value = TemporalType.DATE)
     private Date endDate;
     
+    @OneToMany(mappedBy = "service")
+//    @LazyCollection(LazyCollectionOption.FALSE) 
+    @Fetch(value = FetchMode.SUBSELECT)
+    private Set<ServiceTypeRelationship> serviceTypeRelationship;
+    
+    @OneToMany(mappedBy = "service")
+//    @LazyCollection(LazyCollectionOption.FALSE) 
+    @Fetch(value = FetchMode.SUBSELECT)
+    private Set<SpecialtyRelationship> specialtyRelationship;
+    
+    
     public ServiceCatalog() {
     
     }
     
     @Override
     public String toString() {
-		return "Service [id=" + logicalId + ",ext_id=" + externalIdentifier + ", name=" + name + ", desc=" + description +" ]";
+		return "ServiceCatalog [id=" + logicalId + ",ext_id=" + externalIdentifier + ", name=" + name + ", desc=" + description +" ]";
     }    
         
 }
