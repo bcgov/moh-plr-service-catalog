@@ -19,7 +19,7 @@ public class ServiceCatalogServerApplication {
     
     @Bean
     public ServletRegistrationBean ServletRegistrationBean() {
-        ServletRegistrationBean registration = new ServletRegistrationBean(new ServiceCatalogRestfulServer(context),"/ServiceCatalogue/*");
+        ServletRegistrationBean registration = new ServletRegistrationBean(new ServiceCatalogRestfulServer(context), "/ServiceCatalogue/*");
         registration.setName("PLRServiceCatalog");
         return registration;
     }

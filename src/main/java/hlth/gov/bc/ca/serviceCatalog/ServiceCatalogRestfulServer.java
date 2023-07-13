@@ -35,10 +35,7 @@ public class ServiceCatalogRestfulServer extends RestfulServer {
         setFhirContext(FhirContext.forR4());
         
         //Register Resource Providers 
-//        setResourceProviders(Arrays.asList(
-//            applicationContext.getBean(Expertise.class)));
         registerProvider(applicationContext.getBean(ServiceCatalogProvider.class));
-//        registerProvider(applicationContext.getBean(ValueSetProvider.class));
         
         CorsConfiguration  config = new  CorsConfiguration();
         config.addAllowedHeader("x-fhir-starter");

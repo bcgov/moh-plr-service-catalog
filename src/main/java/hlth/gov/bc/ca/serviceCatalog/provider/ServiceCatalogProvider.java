@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import org.apache.commons.collections4.map.PassiveExpiringMap;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -27,6 +26,8 @@ import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.HealthcareService;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4bc1.model.BCCatalogService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,21 +46,21 @@ public class ServiceCatalogProvider implements IResourceProvider{
     ServiceCatalogRepository serviceCatalogRepo;
     
     //A Map to hold all the codeSystems with their codes. Expiry time is set to 1 hour.
-    private final PassiveExpiringMap<String, CodeSystem> codeSystemMap = new PassiveExpiringMap<>(3600000);
+//    private final PassiveExpiringMap<String, CodeSystem> codeSystemMap = new PassiveExpiringMap<>(3600000);
     
     @Override
     public Class<? extends IBaseResource> getResourceType() {
-        return HealthcareService.class;
+        return BCCatalogService.class;
     }
     
     @Read()
-    public HealthcareService read(@IdParam IdType theId) {
+    public BCCatalogService read(@IdParam IdType theId) {
         return getServiceById(theId.getIdPart());
     }
 
     // TODO need to add search by service Type, specialty, ExternalIdentifier, System and Parent
     @Search
-    public List<HealthcareService> search(
+    public List<BCCatalogService> search(
             @OptionalParam(name = HealthcareService.SP_NAME) StringParam name,
             @OptionalParam(name = HealthcareService.SP_IDENTIFIER) StringParam identifier ) {
         
@@ -67,7 +68,7 @@ public class ServiceCatalogProvider implements IResourceProvider{
     }
 
 
-    private HealthcareService getServiceById(String id) throws ResourceNotFoundException {
+    private BCCatalogService getServiceById(String id) throws ResourceNotFoundException {
         ServiceCatalog service = serviceCatalogRepo.findByLogicalId(new Long(id));
         if (service == null) {
             throw new ResourceNotFoundException("Code System not found: "+id);
@@ -76,9 +77,9 @@ public class ServiceCatalogProvider implements IResourceProvider{
         return transformToHealthcareService(service);
     }
 
-    private HealthcareService transformToHealthcareService(ServiceCatalog service)  {
+    private BCCatalogService transformToHealthcareService(ServiceCatalog service)  {
 
-        HealthcareService hs = new HealthcareService();
+        BCCatalogService hs = new BCCatalogService();
         hs.setId(Long.toString(service.getLogicalId()));
         hs.setActive(true);
         hs.setName(service.getName());
@@ -90,21 +91,24 @@ public class ServiceCatalogProvider implements IResourceProvider{
         buildSpecialtyList(service.getSpecialtyRelationship(), hs);
         buildTypeList(service.getServiceTypeRelationship(), hs);
 
-        if(service.getParentService()!=null){
-            List <Extension> extensionList = new ArrayList<>();
-            Extension offeredIn = new Extension("http://hl7.org/fhir/5.0/StructureDefinition/extension-HealthcareService.offeredIn");
-            offeredIn.setId("offeredIn");
-//            offeredIn.setValue(getHealthcareService(service.getParentService()));
+        if(service.getParentService()!= null){
+            BCCatalogService parent = transformToHealthcareService(service.getParentService());
+            hs.setOfferedInExtension(new Reference(parent));
+            
+//            List <Extension> extensionList = new ArrayList<>();
+//            Extension offeredIn = new Extension("http://hl7.org/fhir/5.0/StructureDefinition/extension-HealthcareService.offeredIn");
+//            offeredIn.setId("offeredIn");
+//            offeredIn.setValue();
 // TODO or should it be a Reference?
-            offeredIn.setUserData("offeredIn", transformToHealthcareService(service.getParentService()));
-            extensionList.add(offeredIn);
-            hs.setExtension(extensionList);
+//            offeredIn.setUserData("offeredIn", transformToHealthcareService(service.getParentService()));
+//            extensionList.add(offeredIn);
+//            hs.setExtension(extensionList);
         }
 
         return hs;
     }
 
-    private void buildIdentifiersList(ServiceCatalog service, HealthcareService hs) {
+    private void buildIdentifiersList(ServiceCatalog service, BCCatalogService hs) {
         List <Identifier> listIdentifier = new ArrayList();
         Identifier logicalId  = new Identifier();
         logicalId.setId(Long.toString(service.getLogicalId()));
@@ -117,7 +121,7 @@ public class ServiceCatalogProvider implements IResourceProvider{
         hs.setIdentifier(listIdentifier);
     }
 
-    private void buildSpecialtyList(Set <SpecialtyRelationship> specialtyRelList, HealthcareService hs) {
+    private void buildSpecialtyList(Set <SpecialtyRelationship> specialtyRelList, BCCatalogService hs) {
         List <CodeableConcept> specialtyList= new ArrayList();
         CodeableConcept specialtyCode;
         Coding code;
@@ -131,7 +135,7 @@ public class ServiceCatalogProvider implements IResourceProvider{
         hs.setSpecialty(specialtyList);
     }
     
-    private void buildTypeList(Set <ServiceTypeRelationship> typeRelList, HealthcareService hs) {
+    private void buildTypeList(Set <ServiceTypeRelationship> typeRelList, BCCatalogService hs) {
         List <CodeableConcept> typeList= new ArrayList();
         CodeableConcept typeCode;
         Coding code;
@@ -145,16 +149,16 @@ public class ServiceCatalogProvider implements IResourceProvider{
         hs.setType(typeList);
     }
         
-    private List<HealthcareService> search(String name){
+    private List<BCCatalogService> search(String name){
         
         List <ServiceCatalog> listService = serviceCatalogRepo.findByName(name);
         log.debug ("how many service found by name:"+listService.size());
         return transformList(listService);
     }
 
-    private List<HealthcareService> transformList(List<ServiceCatalog> listService) {
-        List <HealthcareService> healhcareServiceList = new ArrayList<>();
-        HealthcareService hs;
+    private List<BCCatalogService> transformList(List<ServiceCatalog> listService) {
+        List <BCCatalogService> healhcareServiceList = new ArrayList<>();
+        BCCatalogService hs;
         for (ServiceCatalog service : listService) {
             hs = transformToHealthcareService(service);
             healhcareServiceList.add (hs);
