@@ -16,13 +16,12 @@ import hlth.gov.bc.ca.serviceCatalog.repository.ServiceCatalogRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.apache.commons.collections4.map.PassiveExpiringMap;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.HealthcareService;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
@@ -58,13 +57,16 @@ public class ServiceCatalogProvider implements IResourceProvider{
         return getServiceById(theId.getIdPart());
     }
 
-    // TODO need to add search by service Type, specialty, ExternalIdentifier, System and Parent
+    // TODO need to add search by service Type, specialty, and Parent
     @Search
     public List<BCCatalogService> search(
             @OptionalParam(name = HealthcareService.SP_NAME) StringParam name,
-            @OptionalParam(name = HealthcareService.SP_IDENTIFIER) StringParam identifier ) {
+            @OptionalParam(name = HealthcareService.SP_IDENTIFIER) StringParam identifier, 
+            @OptionalParam(name = "system") StringParam systemCode) {
         
-        return this.search(ifNullParam(name));
+        return this.search(ifNullParam(name),
+                ifNullParam(identifier),
+                ifNullParam(systemCode));
     }
 
 
@@ -91,18 +93,9 @@ public class ServiceCatalogProvider implements IResourceProvider{
         buildSpecialtyList(service.getSpecialtyRelationship(), hs);
         buildTypeList(service.getServiceTypeRelationship(), hs);
 
-        if(service.getParentService()!= null){
+        if (service.getParentService()!= null){
             BCCatalogService parent = transformToHealthcareService(service.getParentService());
             hs.setOfferedInExtension(new Reference(parent));
-            
-//            List <Extension> extensionList = new ArrayList<>();
-//            Extension offeredIn = new Extension("http://hl7.org/fhir/5.0/StructureDefinition/extension-HealthcareService.offeredIn");
-//            offeredIn.setId("offeredIn");
-//            offeredIn.setValue();
-// TODO or should it be a Reference?
-//            offeredIn.setUserData("offeredIn", transformToHealthcareService(service.getParentService()));
-//            extensionList.add(offeredIn);
-//            hs.setExtension(extensionList);
         }
 
         return hs;
@@ -149,10 +142,24 @@ public class ServiceCatalogProvider implements IResourceProvider{
         hs.setType(typeList);
     }
         
-    private List<BCCatalogService> search(String name){
+    private List<BCCatalogService> search(String name, String extIdentifier, String systemCode){
+        List <ServiceCatalog> listService;
+        if(systemCode == null){
+            listService = serviceCatalogRepo.findByName(name);
+            log.debug ("how many service found by name:"+listService.size());
+        } else if (extIdentifier != null) {
+            // Should be unique though
+            listService = serviceCatalogRepo.findByExternalIdentifierAndSystem(extIdentifier, systemCode);
+            log.debug ("how many service found by extIdentifier:"+listService.size());
+        } else {
+        List<ServiceCatalog> rawServiceList = serviceCatalogRepo.findBySystemCode(systemCode);
+        log.debug ("how many service found by code:"+rawServiceList.size());
         
-        List <ServiceCatalog> listService = serviceCatalogRepo.findByName(name);
-        log.debug ("how many service found by name:"+listService.size());
+        // Loop through the service looking for matches
+        listService = rawServiceList.stream()
+                .filter(next -> searchBy(name, next.getName()) )
+                .collect(Collectors.toList());
+        }
         return transformList(listService);
     }
 
@@ -164,15 +171,6 @@ public class ServiceCatalogProvider implements IResourceProvider{
             healhcareServiceList.add (hs);
         }
         return healhcareServiceList;
-        
-        // Loop through the patients looking for matches
-//         List<CodeSystem> codesList = codeSystemMap.values()
-//                .stream()
-//                .filter(next -> searchBy(url, next.getUrl()) )
-//                .filter(next -> searchBy(name, next.getName()) )
-//                .filter(next -> searchBy(title, next.getTitle()) )
-//                .collect(Collectors.toList());
-//        return codesList;
     }
 
 

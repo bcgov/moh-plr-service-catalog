@@ -18,7 +18,6 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import lombok.Getter;
-import lombok.Setter;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.LazyCollection;
@@ -57,7 +56,6 @@ public class ServiceCatalog {
     @JoinColumn(name = "system_id")
     private SystemOfOrigin system;
 
-//    @Column(name = "parent_service_id")    
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "parent_service_id")
     private ServiceCatalog parentService;

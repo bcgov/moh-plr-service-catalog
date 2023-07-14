@@ -4,8 +4,6 @@
  */
 package hlth.gov.bc.ca.serviceCatalog;
 
-import java.util.HashMap;
-import java.util.Map;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 
