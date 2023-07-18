@@ -14,7 +14,12 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 /**
  *
@@ -22,13 +27,17 @@ import lombok.Getter;
  */
 @Entity
 @Table(name = "hs_system_of_origin", schema="plr_hs_catalog")
-@Getter
+ @Builder(toBuilder = true)
+ @AllArgsConstructor(access = AccessLevel.PACKAGE)
+ @NoArgsConstructor(access = AccessLevel.PACKAGE)
+ @Setter(value = AccessLevel.PACKAGE)
+ @Getter
 public class SystemOfOrigin {
     
     @Id
     @Column(name = "system_id")
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private long systemId;
+    private Long systemId;
 
     @Column(name = "system_cd")
     private String code;
@@ -46,9 +55,6 @@ public class SystemOfOrigin {
     @Column(name = "effective_end_dt")
     @Temporal(value = TemporalType.DATE)
     private Date endDate;
-    
-    public SystemOfOrigin() {
-    }
     
     @Override
     public String toString() {

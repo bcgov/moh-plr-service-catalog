@@ -18,7 +18,12 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 /**
  *
@@ -26,13 +31,17 @@ import lombok.Getter;
  */
 @Entity
 @Table(name = "specialty_rel", schema="plr_hs_catalog")
-@Getter
+ @Builder(toBuilder = true)
+ @AllArgsConstructor(access = AccessLevel.PACKAGE)
+ @NoArgsConstructor(access = AccessLevel.PACKAGE)
+ @Setter(value = AccessLevel.PACKAGE)
+ @Getter
 public class SpecialtyRelationship {
     
     @Id
     @Column(name = "specialty_rel_id")
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private long specialtyRelationId;
+    private Long specialtyRelationId;
 
     @Column(name = "specialty_lookup_cd")
     private String lookupCode;
@@ -52,9 +61,6 @@ public class SpecialtyRelationship {
     @Column(name = "effective_end_dt")
     @Temporal(value = TemporalType.DATE)
     private Date endDate;
-    
-    public SpecialtyRelationship() {
-    }
     
     @Override
     public String toString() {

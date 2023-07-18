@@ -12,13 +12,13 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import hlth.gov.bc.ca.serviceCatalog.entity.ServiceCatalog;
 import hlth.gov.bc.ca.serviceCatalog.entity.ServiceTypeRelationship;
 import hlth.gov.bc.ca.serviceCatalog.entity.SpecialtyRelationship;
+import hlth.gov.bc.ca.serviceCatalog.entity.SystemOfOrigin;
 import hlth.gov.bc.ca.serviceCatalog.repository.ServiceCatalogRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
-import org.apache.commons.collections4.map.PassiveExpiringMap;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -30,6 +30,7 @@ import org.hl7.fhir.r4bc1.model.BCCatalogService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Component;
 
 /**
@@ -57,21 +58,26 @@ public class ServiceCatalogProvider implements IResourceProvider{
         return getServiceById(theId.getIdPart());
     }
 
-    // TODO need to add search by service Type, specialty, and Parent
     @Search
     public List<BCCatalogService> search(
             @OptionalParam(name = HealthcareService.SP_NAME) StringParam name,
             @OptionalParam(name = HealthcareService.SP_IDENTIFIER) StringParam identifier, 
+            @OptionalParam(name = HealthcareService.SP_SERVICE_TYPE) StringParam serviceTypeCode, 
+            @OptionalParam(name = HealthcareService.SP_SPECIALTY) StringParam specialtyCode, 
+            @OptionalParam(name = "offered-in") StringParam offeredIn, 
             @OptionalParam(name = "system") StringParam systemCode) {
-        
+           
         return this.search(ifNullParam(name),
                 ifNullParam(identifier),
+                ifNullParam(serviceTypeCode),
+                ifNullParam(specialtyCode),
+                ifNullParam(offeredIn),
                 ifNullParam(systemCode));
     }
 
 
     private BCCatalogService getServiceById(String id) throws ResourceNotFoundException {
-        ServiceCatalog service = serviceCatalogRepo.findByLogicalId(new Long(id));
+        ServiceCatalog service = serviceCatalogRepo.findByLogicalId(Long.valueOf(id));
         if (service == null) {
             throw new ResourceNotFoundException("Code System not found: "+id);
         }
@@ -89,9 +95,10 @@ public class ServiceCatalogProvider implements IResourceProvider{
         
         hs.addCategory(new CodeableConcept(new Coding("https://terminology.hlth.gov.bc.ca/ProviderLocationRegistry/CodeSystem/bc-service-type-code-system", "catalogue","")));
         
+        // currently, only one identifier, with or without a value. If need to add extra, we can create a separate table to store the additional external identifers
         buildIdentifiersList(service, hs);
-        buildSpecialtyList(service.getSpecialtyRelationship(), hs);
-        buildTypeList(service.getServiceTypeRelationship(), hs);
+        buildSpecialtyList(service.getSpecialtyRelationships(), hs);
+        buildTypeList(service.getServiceTypeRelationships(), hs);
 
         if (service.getParentService()!= null){
             BCCatalogService parent = transformToHealthcareService(service.getParentService());
@@ -103,13 +110,9 @@ public class ServiceCatalogProvider implements IResourceProvider{
 
     private void buildIdentifiersList(ServiceCatalog service, BCCatalogService hs) {
         List <Identifier> listIdentifier = new ArrayList();
-        Identifier logicalId  = new Identifier();
-        logicalId.setId(Long.toString(service.getLogicalId()));
-        logicalId.setSystem(service.getSystem().getCode());
-        listIdentifier.add(logicalId);
         Identifier externalId  = new Identifier();
         externalId.setId(service.getExternalIdentifier());
-        externalId.setSystem("external");
+        externalId.setSystem(service.getSystem().getCode());
         listIdentifier.add(externalId);
         hs.setIdentifier(listIdentifier);
     }
@@ -142,24 +145,39 @@ public class ServiceCatalogProvider implements IResourceProvider{
         hs.setType(typeList);
     }
         
-    private List<BCCatalogService> search(String name, String extIdentifier, String systemCode){
+    private List<BCCatalogService> search(String name, String extIdentifier, String serviceTypeCode, String specialtyCode, String offeredIn, String systemCode){
         List <ServiceCatalog> listService;
-        if(systemCode == null){
-            listService = serviceCatalogRepo.findByName(name);
-            log.debug ("how many service found by name:"+listService.size());
-        } else if (extIdentifier != null) {
-            // Should be unique though
-            listService = serviceCatalogRepo.findByExternalIdentifierAndSystem(extIdentifier, systemCode);
-            log.debug ("how many service found by extIdentifier:"+listService.size());
-        } else {
-        List<ServiceCatalog> rawServiceList = serviceCatalogRepo.findBySystemCode(systemCode);
-        log.debug ("how many service found by code:"+rawServiceList.size());
+
+
+        ServiceCatalog criteria = ServiceCatalog.builder()
+                .name(name)
+                .externalIdentifier(extIdentifier)
+                .system(SystemOfOrigin.builder().code(systemCode).build())
+                .parentService(ServiceCatalog.builder().logicalId(NumberUtils.createLong(offeredIn)).build())
+                .specialtyRelationship(SpecialtyRelationship.builder().lookupCode(specialtyCode).build())
+                //.serviceTypeRelationship(ServiceTypeRelationship.builder().lookupCode(serviceTypeCode).build())
+                .build();
+         listService = serviceCatalogRepo.findAll(Example.of(criteria));
         
-        // Loop through the service looking for matches
-        listService = rawServiceList.stream()
-                .filter(next -> searchBy(name, next.getName()) )
-                .collect(Collectors.toList());
-        }
+            
+//            listService = serviceCatalogRepo.findBySpecialty(specialtyCode);
+//            log.debug ("how many service found by specialty: "+listService.size());
+
+            // if need recursive search by parent (aka drill down to see next levels children), add a different parameters to search request
+//            listService = serviceCatalogRepo.findByParent(new Long(offeredIn));
+//            log.debug ("how many service found by parent: "+listService.size());
+            
+//            // Should be unique (extIdentifier + system)
+//            listService = serviceCatalogRepo.findByExternalIdentifierAndSystem(extIdentifier, systemCode);
+//            log.debug ("how many service found by extIdentifier+system: "+listService.size());
+
+//            List<ServiceCatalog> rawServiceList = serviceCatalogRepo.findBySystemCode(systemCode);
+//            log.debug ("how many service found by system: "+rawServiceList.size());
+//            // Loop through the service looking for matches
+//            listService = rawServiceList.stream()
+//                .filter(next -> searchBy(name, next.getName()) )
+//                .collect(Collectors.toList());
+
         return transformList(listService);
     }
 
