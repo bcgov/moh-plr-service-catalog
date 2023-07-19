@@ -7,6 +7,7 @@ package hlth.gov.bc.ca.serviceCatalog.repository;
 
 import hlth.gov.bc.ca.serviceCatalog.entity.ServiceCatalog;
 import java.util.List;
+import org.springframework.data.domain.Example;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -43,6 +44,7 @@ public interface ServiceCatalogRepository extends JpaRepository<ServiceCatalog, 
     @Query("SELECT s FROM ServiceCatalog s WHERE s.parentService.logicalId = :parentLogicalId")
     List <ServiceCatalog> findByParent(Long parentLogicalId);
     
+//    List <ServiceCatalog> findAllIgnoreCase(Example <ServiceCatalog> criteria);
     
     List <ServiceCatalog> findByNameContainingIgnoreCase(String name);
     @Query(value="SELECT * FROM plr_hs_catalog.catalog_service s WHERE s.service_name ILIKE %:name%", nativeQuery = true)

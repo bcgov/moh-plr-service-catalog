@@ -8,13 +8,9 @@ package hlth.gov.bc.ca.serviceCatalog.entity;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -30,30 +26,24 @@ import lombok.Setter;
  * @author camille.estival
  */
 @Entity
-@Table(name = "specialty_rel", schema="plr_hs_catalog")
+@Table(name = "code_system", schema= "plr_hs_catalog")
  @Builder(toBuilder = true)
  @AllArgsConstructor(access = AccessLevel.PACKAGE)
  @NoArgsConstructor(access = AccessLevel.PACKAGE)
  @Setter(value = AccessLevel.PACKAGE)
  @Getter
-public class SpecialtyRelationship {
+public class CodeSystem {
     
     @Id
-    @Column(name = "specialty_rel_id")
+    @Column(name = "code_system_id")
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long specialtyRelationId;
+    private Long codeSystemId;
 
-    @Column(name = "specialty_lookup_cd")
-    private String lookupCode;
-
-//    @OneToOne(fetch = FetchType.EAGER)
-    @OneToOne()
-    @JoinColumn(name = "code_system_id")
-    private CodeSystem codeSystem;
+    @Column(name = "code_system_desc_txt")
+    private String description;
     
-    @ManyToOne
-    @JoinColumn(name = "catalog_service_id")
-    private ServiceCatalog service;
+    @Column(name = "code_system_lookup_url")
+    private String systemUrl;
 
     @Column(name = "effective_start_dt")
     @Temporal(value = TemporalType.DATE)
@@ -65,9 +55,7 @@ public class SpecialtyRelationship {
     
     @Override
     public String toString() {
-	return "SpecialtyRelationship [id=" + specialtyRelationId 
-                + ", code=" + lookupCode 
-                + ", serviceID=" 
-                + ", codeSystemURL=" + codeSystem.getSystemUrl() +" ]";
+		return "SystemOfOrigin [id=" + codeSystemId + ", desc=" + description +", URL=" + systemUrl +" ]";
     }    
+        
 }

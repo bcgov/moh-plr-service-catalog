@@ -17,6 +17,7 @@ import hlth.gov.bc.ca.serviceCatalog.repository.ServiceCatalogRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -146,22 +147,45 @@ public class ServiceCatalogProvider implements IResourceProvider{
     }
         
     private List<BCCatalogService> search(String name, String extIdentifier, String serviceTypeCode, String specialtyCode, String offeredIn, String systemCode){
-        List <ServiceCatalog> listService;
-
-
+        
         ServiceCatalog criteria = ServiceCatalog.builder()
                 .name(name)
                 .externalIdentifier(extIdentifier)
                 .system(SystemOfOrigin.builder().code(systemCode).build())
-                .parentService(ServiceCatalog.builder().logicalId(NumberUtils.createLong(offeredIn)).build())
-                .specialtyRelationship(SpecialtyRelationship.builder().lookupCode(specialtyCode).build())
-                //.serviceTypeRelationship(ServiceTypeRelationship.builder().lookupCode(serviceTypeCode).build())
+//                .parentService(ServiceCatalog.builder().logicalId(NumberUtils.createLong(offeredIn)).build())
+//                .specialtyRelationship(SpecialtyRelationship.builder().lookupCode(specialtyCode).build())
+//                .serviceTypeRelationship(ServiceTypeRelationship.builder().lookupCode(serviceTypeCode).build())
                 .build();
-         listService = serviceCatalogRepo.findAll(Example.of(criteria));
         
+        List <ServiceCatalog> listService = serviceCatalogRepo.findAll(Example.of(criteria));
+        log.debug ("how many service found by criteria (name, extIdentifier or system): "+listService.size());
+        
+        if (offeredIn != null){
+            // Loop through the service looking for matches
+            listService = listService.stream()
+                .filter(next -> parentMatched(next.getParentService(), offeredIn) )
+                .collect(Collectors.toList());
             
-//            listService = serviceCatalogRepo.findBySpecialty(specialtyCode);
-//            log.debug ("how many service found by specialty: "+listService.size());
+            log.debug ("how many service found by parent: "+listService.size());
+        }
+        
+        if (serviceTypeCode != null){
+            listService = listService.stream()
+                .filter(next -> anyTypeMatched(next, serviceTypeCode)  )
+                .collect(Collectors.toList());
+            
+            log.debug ("how many service found by serviceType: "+listService.size());
+        }
+                
+        
+        if (specialtyCode != null){
+            listService = listService.stream()
+                .filter(next -> anySpecialtyMatched(next, specialtyCode)  )
+                .collect(Collectors.toList());
+            
+            log.debug ("how many service found by specialtyCode: "+listService.size());
+        }
+            
 
             // if need recursive search by parent (aka drill down to see next levels children), add a different parameters to search request
 //            listService = serviceCatalogRepo.findByParent(new Long(offeredIn));
@@ -181,6 +205,24 @@ public class ServiceCatalogProvider implements IResourceProvider{
         return transformList(listService);
     }
 
+    public static boolean parentMatched(ServiceCatalog parent, String offeredIn) {
+        if(parent != null){
+            return searchBy(offeredIn, parent.getLogicalId().toString());
+        } 
+        return false;
+    }
+
+    public boolean anyTypeMatched(ServiceCatalog serviceCatalog, String serviceTypeCode) {
+        return serviceCatalog.getServiceTypeRelationships()
+                .stream()
+                .anyMatch(next -> searchBy(serviceTypeCode, next.getLookupCode()));
+    }
+
+    public boolean anySpecialtyMatched(ServiceCatalog serviceCatalog, String code) {
+        return serviceCatalog.getSpecialtyRelationships()
+                .stream()
+                .anyMatch(next -> searchBy(code, next.getLookupCode()));
+    }
     private List<BCCatalogService> transformList(List<ServiceCatalog> listService) {
         List <BCCatalogService> healhcareServiceList = new ArrayList<>();
         BCCatalogService hs;

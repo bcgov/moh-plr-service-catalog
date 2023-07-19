@@ -27,8 +27,8 @@ import lombok.Setter;
 import lombok.Singular;
 //import org.hibernate.annotations.Fetch;
 //import org.hibernate.annotations.FetchMode;
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
+//import org.hibernate.annotations.LazyCollection;
+//import org.hibernate.annotations.LazyCollectionOption;
 
 /**
  *
@@ -60,11 +60,11 @@ public class ServiceCatalog implements Serializable{
     @Column(name = "service_desc_txt")
     private String description;
     
-    @OneToOne(fetch = FetchType.EAGER)
+    @OneToOne()
     @JoinColumn(name = "system_id")
     private SystemOfOrigin system;
 
-    @OneToOne(fetch = FetchType.EAGER)
+    @OneToOne (fetch = FetchType.EAGER)
     @JoinColumn(name = "parent_service_id")
     private ServiceCatalog parentService;
     
@@ -74,12 +74,13 @@ public class ServiceCatalog implements Serializable{
     @Column(name = "comments_txt")
     private String comments;
     
-    @OneToMany(mappedBy = "service")
-    @LazyCollection(LazyCollectionOption.FALSE) 
-//    @Fetch(value = FetchMode.SUBSELECT)
+    @OneToMany(mappedBy = "service", fetch = FetchType.EAGER)
+//    @LazyCollection(LazyCollectionOption.FALSE) 
+//    @Fetch(value = FetchMode.SUBSELECT) 
     @Singular private Set<ServiceTypeRelationship> serviceTypeRelationships;
     
     @OneToMany(mappedBy = "service", fetch = FetchType.EAGER)
+//    @OneToMany(mappedBy = "service", fetch = FetchType.EAGER) 
 //    @LazyCollection(LazyCollectionOption.FALSE) // TODO find out which one is safer to eagerly retrieve these lists
 //    @Fetch(value = FetchMode.SUBSELECT)
     @Singular private Set<SpecialtyRelationship> specialtyRelationships;

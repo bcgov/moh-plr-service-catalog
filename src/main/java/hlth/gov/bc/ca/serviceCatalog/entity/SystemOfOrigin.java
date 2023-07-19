@@ -45,8 +45,8 @@ public class SystemOfOrigin {
     @Column(name = "system_desc_txt")
     private String description;
     
-    @Column(name = "system_lookup_url")
-    private String systemUrl;
+//    @Column(name = "system_lookup_url")
+//    private String systemUrl;
 
     @Column(name = "effective_start_dt")
     @Temporal(value = TemporalType.DATE)
@@ -58,7 +58,7 @@ public class SystemOfOrigin {
     
     @Override
     public String toString() {
-		return "SystemOfOrigin [id=" + systemId + ", code=" + code + ", desc=" + description +", URL=" + systemUrl +" ]";
+        return "SystemOfOrigin [id=" + systemId + ", code=" + code + ", desc=" + description +" ]";
     }    
         
 }

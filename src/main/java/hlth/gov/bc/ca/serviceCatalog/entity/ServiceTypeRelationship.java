@@ -46,9 +46,10 @@ public class ServiceTypeRelationship {
     @Column(name = "service_type_lookup_cd")
     private String lookupCode;
 
-    @OneToOne(fetch = FetchType.EAGER)
+//    @OneToOne(fetch = FetchType.EAGER)
+    @OneToOne()
     @JoinColumn(name = "code_system_id")
-    private SystemOfOrigin codeSystem;
+    private CodeSystem codeSystem;
     
     @ManyToOne
     @JoinColumn(name = "catalog_service_id")
@@ -68,6 +69,6 @@ public class ServiceTypeRelationship {
                 + ", code=" + lookupCode 
                 + ", serviceID="  
                 + ", codeSystemURL=" 
-                + codeSystem.getCode() +" ]";
+                + codeSystem.getSystemUrl()+" ]";
     }    
 }
