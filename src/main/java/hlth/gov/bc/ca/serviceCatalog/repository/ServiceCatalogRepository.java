@@ -21,16 +21,28 @@ import org.springframework.stereotype.Repository;
 public interface ServiceCatalogRepository extends JpaRepository<ServiceCatalog, Long> {
     
     ServiceCatalog findByLogicalId(long logicalId);
-    List <ServiceCatalog> findByName(String name);
     
-    @Query("SELECT s FROM ServiceCatalog s WHERE (:systemCode is null OR s.system.code =:systemCode) "
-            + "and (:externalIdentifier is null OR s.externalIdentifier=:externalIdentifier)")
-    List <ServiceCatalog> searchServiceCatalog(String externalIdentifier, String systemCode);
+    @Query(value="SELECT * FROM plr_hs_catalog.catalog_service s, plr_hs_catalog.hs_system_of_origin syst, plr_hs_catalog.catalog_service parent "
+                + "WHERE s.system_id = syst.system_id "
+                + "AND s.parent_service_id = parent.catalog_service_id "
+                + "AND (:name is null OR s.service_name ILIKE %:name%) "
+                + "AND (:systemCode is null OR syst.system_cd = :systemCode) "
+                + "AND (:externalIdentifier is null OR s.service_ext_ident = :externalIdentifier)"
+                + "AND (:parentLogicalId is null OR parent.service_logical_id = :parentLogicalId)",
+            nativeQuery = true)
+    List <ServiceCatalog> searchServiceCatalog(String name, String externalIdentifier, String systemCode, Long parentLogicalId);
+   
+    
+    List <ServiceCatalog> findByName(String name);
+    List <ServiceCatalog> findByNameContainingIgnoreCase(String name);
+    
+    @Query(value="SELECT * FROM plr_hs_catalog.catalog_service s WHERE s.service_name ILIKE %:name%", nativeQuery = true)
+    List <ServiceCatalog> searchByNameNative(@Param("name") String name);
     
     @Query("SELECT s FROM ServiceCatalog s WHERE s.system.code =:systemCode and s.externalIdentifier=:externalIdentifier")
     List <ServiceCatalog> findByExternalIdentifierAndSystem(String externalIdentifier, String systemCode);
     
-//    @Query("SELECT s FROM plr_hs_catalog.catalog_service cat, plr_hs_catalog.hs_system_of_origin syst WHERE syst.system_id = cCat.system_id and syst.system_cd =:systemCode")
+//    @Query("SELECT s FROM plr_hs_catalog.catalog_service cat, plr_hs_catalog.hs_system_of_origin syst WHERE syst.system_id = cat.system_id and syst.system_cd =:systemCode")
     @Query("SELECT s FROM ServiceCatalog s WHERE s.system.code = :systemCode")
     List <ServiceCatalog> findBySystemCode(String systemCode);
     
@@ -40,15 +52,7 @@ public interface ServiceCatalogRepository extends JpaRepository<ServiceCatalog, 
     @Query("SELECT s FROM ServiceCatalog s, ServiceTypeRelationship str WHERE s.serviceId = str.service.serviceId AND str.lookupCode = :typeCode")
     List <ServiceCatalog> findByServiceType(String typeCode);
     
-    // TODO need recursive search by parent? not sure, they can drill down to see more children
-    @Query("SELECT s FROM ServiceCatalog s WHERE s.parentService.logicalId = :parentLogicalId")
-    List <ServiceCatalog> findByParent(Long parentLogicalId);
-    
-//    List <ServiceCatalog> findAllIgnoreCase(Example <ServiceCatalog> criteria);
-    
-    List <ServiceCatalog> findByNameContainingIgnoreCase(String name);
-    @Query(value="SELECT * FROM plr_hs_catalog.catalog_service s WHERE s.service_name ILIKE %:name%", nativeQuery = true)
-    List <ServiceCatalog> searchByNameNative(@Param("name") String name);
+
 //    List <ServiceCatalog> findBySpecialtyContaining(String specialtyString);
 //    List <ServiceCatalog> findByServiceTypeContaining(String typeString);
     

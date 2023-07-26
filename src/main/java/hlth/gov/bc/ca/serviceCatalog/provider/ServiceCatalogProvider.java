@@ -148,26 +148,30 @@ public class ServiceCatalogProvider implements IResourceProvider{
         
     private List<BCCatalogService> search(String name, String extIdentifier, String serviceTypeCode, String specialtyCode, String offeredIn, String systemCode){
         
-        ServiceCatalog criteria = ServiceCatalog.builder()
-                .name(name)
-                .externalIdentifier(extIdentifier)
-                .system(SystemOfOrigin.builder().code(systemCode).build())
+//        ServiceCatalog criteria = ServiceCatalog.builder()
+//                .name(name)
+//                .externalIdentifier(extIdentifier)
+//                .system(SystemOfOrigin.builder().code(systemCode).build())
 //                .parentService(ServiceCatalog.builder().logicalId(NumberUtils.createLong(offeredIn)).build())
 //                .specialtyRelationship(SpecialtyRelationship.builder().lookupCode(specialtyCode).build())
 //                .serviceTypeRelationship(ServiceTypeRelationship.builder().lookupCode(serviceTypeCode).build())
-                .build();
+//                .build();
         
-        List <ServiceCatalog> listService = serviceCatalogRepo.findAll(Example.of(criteria));
-        log.debug ("how many service found by criteria (name, extIdentifier or system): "+listService.size());
+//        List <ServiceCatalog> listService = serviceCatalogRepo.findAll(Example.of(criteria));
+//        log.debug ("how many service found by criteria (name, extIdentifier or system): "+listService.size());
         
-        if (offeredIn != null){
-            // Loop through the service looking for matches
-            listService = listService.stream()
-                .filter(next -> parentMatched(next.getParentService(), offeredIn) )
-                .collect(Collectors.toList());
-            
-            log.debug ("how many service found by parent: "+listService.size());
-        }
+        
+        List <ServiceCatalog> listService = serviceCatalogRepo.searchServiceCatalog(name, extIdentifier, systemCode, NumberUtils.createLong(offeredIn));
+        log.debug ("how many service found by criteria (name, extIdentifier, system, parent): "+listService.size());
+        
+//        if (offeredIn != null){
+//            // Loop through the service looking for matches
+//            listService = listService.stream()
+//                .filter(next -> parentMatched(next.getParentService(), offeredIn) )
+//                .collect(Collectors.toList());
+//            
+//            log.debug ("how many service found by parent: "+listService.size());
+//        }
         
         if (serviceTypeCode != null){
             listService = listService.stream()
@@ -176,7 +180,6 @@ public class ServiceCatalogProvider implements IResourceProvider{
             
             log.debug ("how many service found by serviceType: "+listService.size());
         }
-                
         
         if (specialtyCode != null){
             listService = listService.stream()
@@ -187,7 +190,7 @@ public class ServiceCatalogProvider implements IResourceProvider{
         }
             
 
-            // if need recursive search by parent (aka drill down to see next levels children), add a different parameters to search request
+            // if need recursive search by parent (aka drill down to see next levels children), add a different parameter to search request
 //            listService = serviceCatalogRepo.findByParent(new Long(offeredIn));
 //            log.debug ("how many service found by parent: "+listService.size());
             
@@ -223,6 +226,7 @@ public class ServiceCatalogProvider implements IResourceProvider{
                 .stream()
                 .anyMatch(next -> searchBy(code, next.getLookupCode()));
     }
+    
     private List<BCCatalogService> transformList(List<ServiceCatalog> listService) {
         List <BCCatalogService> healhcareServiceList = new ArrayList<>();
         BCCatalogService hs;
@@ -232,7 +236,6 @@ public class ServiceCatalogProvider implements IResourceProvider{
         }
         return healhcareServiceList;
     }
-
 
 
     // TODO this 2 should be Utils method
