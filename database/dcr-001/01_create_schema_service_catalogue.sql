@@ -10,7 +10,7 @@ create schema plr_hs_catalog AUTHORIZATION postgres;
 -- Delete SERVICE_CATALOG_PROXY user if it has already been created
 drop user IF EXISTS SERVICE_CATALOG_PROXY;
 -- Create the proxy user for Service Catalogue
-create user SERVICE_CATALOG_PROXY PASSWORD ''; -- to be setup by DBA
+create user SERVICE_CATALOG_PROXY PASSWORD 'password123'; -- to be setup by DBA
 -- Grant access to connect to the DB
 grant CONNECT on DATABASE plr_hs_catalog to SERVICE_CATALOG_PROXY;
 
