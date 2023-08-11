@@ -112,16 +112,6 @@ public class ServiceCatalogProvider implements IResourceProvider{
      */
     private List<BCCatalogService> search(String name, String extIdentifier, String serviceTypeCode, String specialtyCode, String offeredIn, String systemCode){
         
-//        ServiceCatalog criteria = ServiceCatalog.builder()
-//                .name(name) // does not allow wild card search or ignoreCase
-//                .externalIdentifier(extIdentifier)
-//                .system(SystemOfOrigin.builder().code(systemCode).build())
-//                .build();
-        
-//        List <ServiceCatalog> listService = serviceCatalogRepo.findAll(Example.of(criteria));
-//        log.debug ("how many service found by criteria (name, extIdentifier or system): "+listService.size());
-        
-        
         List <ServiceCatalog> listService = serviceCatalogRepo.searchServiceCatalog(name, extIdentifier, systemCode /**, NumberUtils.createLong(offeredIn)*/);
         log.debug ("how many service found by criteria (name, extIdentifier, system): "+listService.size());
         
