@@ -1,6 +1,5 @@
 package hlth.gov.bc.ca.serviceCatalog;
 
-
 import hlth.gov.bc.ca.serviceCatalog.provider.ServiceCatalogProvider;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.RestfulServer;

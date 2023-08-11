@@ -1,14 +1,8 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package hlth.gov.bc.ca.serviceCatalog.entity;
 
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -26,7 +20,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- *
+ * Entity Class to represent the DB table service_type_rel, which stores the relationships between 
+ * a catalog_service and service type (service_type_lookup_cd) from a given code System (code_system_id)
  * @author camille.estival
  */
 @Entity
@@ -46,7 +41,6 @@ public class ServiceTypeRelationship {
     @Column(name = "service_type_lookup_cd")
     private String lookupCode;
 
-//    @OneToOne(fetch = FetchType.EAGER)
     @OneToOne()
     @JoinColumn(name = "code_system_id")
     private CodeSystem codeSystem;

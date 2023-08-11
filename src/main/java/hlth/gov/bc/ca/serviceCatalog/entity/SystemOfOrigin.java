@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package hlth.gov.bc.ca.serviceCatalog.entity;
 
 import java.util.Date;
@@ -22,7 +17,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- *
+ * Entity Class to represent the DB table hs_system_of_origin, used to define the system that any Catalog Service comes from
  * @author camille.estival
  */
 @Entity
@@ -45,9 +40,6 @@ public class SystemOfOrigin {
     @Column(name = "system_desc_txt")
     private String description;
     
-//    @Column(name = "system_lookup_url")
-//    private String systemUrl;
-
     @Column(name = "effective_start_dt")
     @Temporal(value = TemporalType.DATE)
     private Date startDate;

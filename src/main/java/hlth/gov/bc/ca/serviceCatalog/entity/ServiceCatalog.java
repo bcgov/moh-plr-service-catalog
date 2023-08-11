@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package hlth.gov.bc.ca.serviceCatalog.entity;
 
 import java.io.Serializable;
@@ -25,13 +20,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.Singular;
-//import org.hibernate.annotations.Fetch;
-//import org.hibernate.annotations.FetchMode;
-//import org.hibernate.annotations.LazyCollection;
-//import org.hibernate.annotations.LazyCollectionOption;
 
 /**
- *
+ * Entity Class to represent the DB table catalog_service, which store services of type Catalogue 
+ * (aka just a definition of a service, not an instantiation of a service at a specific organization/clinic) 
  * @author camille.estival
  */
 @Entity
@@ -75,14 +67,9 @@ public class ServiceCatalog implements Serializable{
     private String comments;
     
     @OneToMany(mappedBy = "service", fetch = FetchType.EAGER)
-//    @LazyCollection(LazyCollectionOption.FALSE) 
-//    @Fetch(value = FetchMode.SUBSELECT) 
     @Singular private Set<ServiceTypeRelationship> serviceTypeRelationships;
     
     @OneToMany(mappedBy = "service", fetch = FetchType.EAGER)
-//    @OneToMany(mappedBy = "service", fetch = FetchType.EAGER) 
-//    @LazyCollection(LazyCollectionOption.FALSE) // TODO find out which one is safer to eagerly retrieve these lists
-//    @Fetch(value = FetchMode.SUBSELECT)
     @Singular private Set<SpecialtyRelationship> specialtyRelationships;
     
     @Column(name = "effective_start_dt")
@@ -95,7 +82,7 @@ public class ServiceCatalog implements Serializable{
     
     @Override
     public String toString() {
-		return "ServiceCatalog [id=" + logicalId + ",ext_id=" + externalIdentifier + ", name=" + name + ", desc=" + description +" ]";
+	return "ServiceCatalog [id=" + logicalId + ",ext_id=" + externalIdentifier + ", name=" + name + ", desc=" + description +" ]";
     }    
         
 }

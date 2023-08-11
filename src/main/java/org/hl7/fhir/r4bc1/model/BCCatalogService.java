@@ -19,7 +19,6 @@ import org.hl7.fhir.r4.model.Reference;
 @ResourceDef(profile = BC_CATALOG_SERVICE_PROFILE_URL, id = "bc-practitioner")
 public class BCCatalogService extends HealthcareService {
 
-    
     /**
      * A custom complex extension for BC Notes Extension with @Extension
      * annotation
@@ -36,46 +35,6 @@ public class BCCatalogService extends HealthcareService {
     public void setOfferedInExtension(Reference offeredIn) {
         offeredInExtension = offeredIn;
     }
-    
-//    /**
-//     * A custom complex extension for BC Notes Extension with @Extension
-//     * annotation
-//     */
-//    @Child(name = "bc-note-extension", min = 0, max = -1)
-//    @Extension(url = BC_NOTE_EXTENSION_URL, definedLocally = false, isModifier = false)
-//    @Description(shortDefinition = "BC Note extension", formalDefinition = "BC Notes")
-//    protected List<BCNoteExtension> bcNoteExtension;
-//
-//    public List<BCNoteExtension> getBcNoteExtension() {
-//        if (bcNoteExtension == null) {
-//            bcNoteExtension = new ArrayList<>();
-//        }
-//        return bcNoteExtension;
-//    }
-//
-//    public void addBcNoteExtension(BCNoteExtension note) {
-//        this.getBcNoteExtension().add(note);
-//    }
-//
-//    public void setBcNoteExtension(List<BCNoteExtension> myBcNoteExtension) {
-//        bcNoteExtension = myBcNoteExtension;
-//    }
-
-//    @Child(name = "period")
-//    @Extension(url = BC_PERIOD_EXTENSION_URL, definedLocally = false, isModifier = false)
-//    @Description(shortDefinition = "Effective dates")
-//    protected Period period;
-//
-//    public Period getPeriod() {
-//        if (period == null) {
-//            period = new Period();
-//        }
-//        return period;
-//    }
-//
-//    public void setPeriod(Period thePeriod) {
-//        period = thePeriod;
-//    }
 
     /**
      * It is important to override the isEmpty() method, adding a check for any
@@ -91,10 +50,6 @@ public class BCCatalogService extends HealthcareService {
         BCCatalogService copy = new BCCatalogService();
         copy.active = active;
         copy.contained = contained;
-//        copy.period = period;
-//        copy.bcNoteExtension = bcNoteExtension;
-//        copy.owner = owner;
-//        copy.endReason = endReason;
         return copy;
     }
 

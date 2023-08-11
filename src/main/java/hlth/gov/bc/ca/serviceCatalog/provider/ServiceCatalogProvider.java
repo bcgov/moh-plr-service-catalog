@@ -12,14 +12,12 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import hlth.gov.bc.ca.serviceCatalog.entity.ServiceCatalog;
 import hlth.gov.bc.ca.serviceCatalog.entity.ServiceTypeRelationship;
 import hlth.gov.bc.ca.serviceCatalog.entity.SpecialtyRelationship;
-import hlth.gov.bc.ca.serviceCatalog.entity.SystemOfOrigin;
 import hlth.gov.bc.ca.serviceCatalog.repository.ServiceCatalogRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -31,7 +29,6 @@ import org.hl7.fhir.r4bc1.model.BCCatalogService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Component;
 
 /**
@@ -46,19 +43,31 @@ public class ServiceCatalogProvider implements IResourceProvider{
     @Autowired
     ServiceCatalogRepository serviceCatalogRepo;
     
-    //A Map to hold all the codeSystems with their codes. Expiry time is set to 1 hour.
-//    private final PassiveExpiringMap<String, CodeSystem> codeSystemMap = new PassiveExpiringMap<>(3600000);
-    
     @Override
     public Class<? extends IBaseResource> getResourceType() {
         return BCCatalogService.class;
     }
     
+    /**
+     * Generate the GET HTTP method to return a single BCCatalogService by its LogicalId
+     * @param theId
+     * @return a single BCCatalogService
+     */
     @Read()
     public BCCatalogService read(@IdParam IdType theId) {
         return getServiceById(theId.getIdPart());
     }
 
+    /**
+     * Generate the search (GET) HTTP method to search for BCCatalogService
+     * @param name, descritpion of the service, search with wildCard (trailing and leading) and IgnoreCase
+     * @param identifier - External identifier of a service, should be unique within a system
+     * @param serviceTypeCode, lookupCode from a codeSystem for serviceType
+     * @param specialtyCode, lookupCode from a codeSystem for Specialty
+     * @param offeredIn, parent of the service, will search for service underneath this service
+     * @param systemCode, system code, representing the origin of a services (MSP, PHSA ..)
+     * @return list of BCCatalogService
+     */
     @Search
     public List<BCCatalogService> search(
             @OptionalParam(name = HealthcareService.SP_NAME) StringParam name,
@@ -76,7 +85,12 @@ public class ServiceCatalogProvider implements IResourceProvider{
                 ifNullParam(systemCode));
     }
 
-
+    /**
+     * query DB to get service by LogicalId
+     * @param id, logical ID to search for
+     * @return BCCatalogService
+     * @throws ResourceNotFoundException 
+     */
     private BCCatalogService getServiceById(String id) throws ResourceNotFoundException {
         ServiceCatalog service = serviceCatalogRepo.findByLogicalId(Long.valueOf(id));
         if (service == null) {
@@ -85,7 +99,65 @@ public class ServiceCatalogProvider implements IResourceProvider{
         log.debug (service.toString());
         return transformToHealthcareService(service);
     }
-
+    
+     /**
+     * 
+     * @param name
+     * @param extIdentifier
+     * @param serviceTypeCode
+     * @param specialtyCode
+     * @param offeredIn
+     * @param systemCode
+     * @return list of BCCatalogService
+     */
+    private List<BCCatalogService> search(String name, String extIdentifier, String serviceTypeCode, String specialtyCode, String offeredIn, String systemCode){
+        
+//        ServiceCatalog criteria = ServiceCatalog.builder()
+//                .name(name) // does not allow wild card search or ignoreCase
+//                .externalIdentifier(extIdentifier)
+//                .system(SystemOfOrigin.builder().code(systemCode).build())
+//                .build();
+        
+//        List <ServiceCatalog> listService = serviceCatalogRepo.findAll(Example.of(criteria));
+//        log.debug ("how many service found by criteria (name, extIdentifier or system): "+listService.size());
+        
+        
+        List <ServiceCatalog> listService = serviceCatalogRepo.searchServiceCatalog(name, extIdentifier, systemCode /**, NumberUtils.createLong(offeredIn)*/);
+        log.debug ("how many service found by criteria (name, extIdentifier, system): "+listService.size());
+        
+        if (offeredIn != null){
+            // Loop through the service looking for matches
+            listService = listService.stream()
+                .filter(next -> parentMatched(next.getParentService(), offeredIn) )
+                .collect(Collectors.toList());
+            
+            log.debug ("how many service found by parent: "+listService.size());
+        }
+        
+        if (serviceTypeCode != null){
+            listService = listService.stream()
+                .filter(next -> anyTypeMatched(next, serviceTypeCode)  )
+                .collect(Collectors.toList());
+            
+            log.debug ("how many service found by serviceType: "+listService.size());
+        }
+        
+        if (specialtyCode != null){
+            listService = listService.stream()
+                .filter(next -> anySpecialtyMatched(next, specialtyCode)  )
+                .collect(Collectors.toList());
+            
+            log.debug ("how many service found by specialtyCode: "+listService.size());
+        }
+            
+        return transformList(listService);
+    }
+    
+    /**
+     * transform the entity ServiceCatalog to a FHIR profile BCCatalogService 
+     * @param service entity ServiceCatalog
+     * @return BCCatalogService
+     */
     private BCCatalogService transformToHealthcareService(ServiceCatalog service)  {
 
         BCCatalogService hs = new BCCatalogService();
@@ -109,16 +181,26 @@ public class ServiceCatalogProvider implements IResourceProvider{
         return hs;
     }
 
-    private void buildIdentifiersList(ServiceCatalog service, BCCatalogService hs) {
+    /**
+     * Build identifiers for the FHIR profile BCCatalogService
+     * @param service entity ServiceCatalog
+     * @param fhirService BCCatalogService
+     */
+    private void buildIdentifiersList(ServiceCatalog service, BCCatalogService fhirService) {
         List <Identifier> listIdentifier = new ArrayList();
         Identifier externalId  = new Identifier();
         externalId.setId(service.getExternalIdentifier());
         externalId.setSystem(service.getSystem().getCode());
         listIdentifier.add(externalId);
-        hs.setIdentifier(listIdentifier);
+        fhirService.setIdentifier(listIdentifier);
     }
 
-    private void buildSpecialtyList(Set <SpecialtyRelationship> specialtyRelList, BCCatalogService hs) {
+    /**
+     * build list of Specialty for the FHIR profile BCCatalogService
+     * @param specialtyRelList list of entity SpecialtyRelationship
+     * @param fhirService BCCatalogService
+     */
+    private void buildSpecialtyList(Set <SpecialtyRelationship> specialtyRelList, BCCatalogService fhirService) {
         List <CodeableConcept> specialtyList= new ArrayList();
         CodeableConcept specialtyCode;
         Coding code;
@@ -129,10 +211,15 @@ public class ServiceCatalogProvider implements IResourceProvider{
                 specialtyList.add(specialtyCode);
             }
         }
-        hs.setSpecialty(specialtyList);
+        fhirService.setSpecialty(specialtyList);
     }
     
-    private void buildTypeList(Set <ServiceTypeRelationship> typeRelList, BCCatalogService hs) {
+    /**
+     * build list of ServiceType for the FHIR profile BCCatalogService
+     * @param typeRelList list of entity ServiceTypeRelationship
+     * @param fhirService BCCatalogService
+     */
+    private void buildTypeList(Set <ServiceTypeRelationship> typeRelList, BCCatalogService fhirService) {
         List <CodeableConcept> typeList= new ArrayList();
         CodeableConcept typeCode;
         Coding code;
@@ -143,100 +230,42 @@ public class ServiceCatalogProvider implements IResourceProvider{
                 typeList.add(typeCode);
             }
         }
-        hs.setType(typeList);
-    }
-        
-    private List<BCCatalogService> search(String name, String extIdentifier, String serviceTypeCode, String specialtyCode, String offeredIn, String systemCode){
-        
-//        ServiceCatalog criteria = ServiceCatalog.builder()
-//                .name(name)
-//                .externalIdentifier(extIdentifier)
-//                .system(SystemOfOrigin.builder().code(systemCode).build())
-//                .parentService(ServiceCatalog.builder().logicalId(NumberUtils.createLong(offeredIn)).build())
-//                .specialtyRelationship(SpecialtyRelationship.builder().lookupCode(specialtyCode).build())
-//                .serviceTypeRelationship(ServiceTypeRelationship.builder().lookupCode(serviceTypeCode).build())
-//                .build();
-        
-//        List <ServiceCatalog> listService = serviceCatalogRepo.findAll(Example.of(criteria));
-//        log.debug ("how many service found by criteria (name, extIdentifier or system): "+listService.size());
-        
-        
-        List <ServiceCatalog> listService = serviceCatalogRepo.searchServiceCatalog(name, extIdentifier, systemCode, NumberUtils.createLong(offeredIn));
-        log.debug ("how many service found by criteria (name, extIdentifier, system, parent): "+listService.size());
-        
-//        if (offeredIn != null){
-//            // Loop through the service looking for matches
-//            listService = listService.stream()
-//                .filter(next -> parentMatched(next.getParentService(), offeredIn) )
-//                .collect(Collectors.toList());
-//            
-//            log.debug ("how many service found by parent: "+listService.size());
-//        }
-        
-        if (serviceTypeCode != null){
-            listService = listService.stream()
-                .filter(next -> anyTypeMatched(next, serviceTypeCode)  )
-                .collect(Collectors.toList());
-            
-            log.debug ("how many service found by serviceType: "+listService.size());
-        }
-        
-        if (specialtyCode != null){
-            listService = listService.stream()
-                .filter(next -> anySpecialtyMatched(next, specialtyCode)  )
-                .collect(Collectors.toList());
-            
-            log.debug ("how many service found by specialtyCode: "+listService.size());
-        }
-            
-
-            // if need recursive search by parent (aka drill down to see next levels children), add a different parameter to search request
-//            listService = serviceCatalogRepo.findByParent(new Long(offeredIn));
-//            log.debug ("how many service found by parent: "+listService.size());
-            
-//            // Should be unique (extIdentifier + system)
-//            listService = serviceCatalogRepo.findByExternalIdentifierAndSystem(extIdentifier, systemCode);
-//            log.debug ("how many service found by extIdentifier+system: "+listService.size());
-
-//            List<ServiceCatalog> rawServiceList = serviceCatalogRepo.findBySystemCode(systemCode);
-//            log.debug ("how many service found by system: "+rawServiceList.size());
-//            // Loop through the service looking for matches
-//            listService = rawServiceList.stream()
-//                .filter(next -> searchBy(name, next.getName()) )
-//                .collect(Collectors.toList());
-
-        return transformList(listService);
+        fhirService.setType(typeList);
     }
 
-    public static boolean parentMatched(ServiceCatalog parent, String offeredIn) {
+    /**
+     * 
+     * @param listService
+     * @return 
+     */
+    private List<BCCatalogService> transformList(List<ServiceCatalog> listService) {
+        List <BCCatalogService> healhcareServiceList = new ArrayList<>();
+        BCCatalogService fhirService;
+        for (ServiceCatalog service : listService) {
+            fhirService = transformToHealthcareService(service);
+            healhcareServiceList.add (fhirService);
+        }
+        return healhcareServiceList;
+    }
+        
+    private static boolean parentMatched(ServiceCatalog parent, String offeredIn) {
         if(parent != null){
             return searchBy(offeredIn, parent.getLogicalId().toString());
         } 
         return false;
     }
 
-    public boolean anyTypeMatched(ServiceCatalog serviceCatalog, String serviceTypeCode) {
+    private boolean anyTypeMatched(ServiceCatalog serviceCatalog, String serviceTypeCode) {
         return serviceCatalog.getServiceTypeRelationships()
                 .stream()
                 .anyMatch(next -> searchBy(serviceTypeCode, next.getLookupCode()));
     }
 
-    public boolean anySpecialtyMatched(ServiceCatalog serviceCatalog, String code) {
+    private boolean anySpecialtyMatched(ServiceCatalog serviceCatalog, String code) {
         return serviceCatalog.getSpecialtyRelationships()
                 .stream()
                 .anyMatch(next -> searchBy(code, next.getLookupCode()));
     }
-    
-    private List<BCCatalogService> transformList(List<ServiceCatalog> listService) {
-        List <BCCatalogService> healhcareServiceList = new ArrayList<>();
-        BCCatalogService hs;
-        for (ServiceCatalog service : listService) {
-            hs = transformToHealthcareService(service);
-            healhcareServiceList.add (hs);
-        }
-        return healhcareServiceList;
-    }
-
 
     // TODO this 2 should be Utils method
     private static boolean searchBy(String param, String csValue) {

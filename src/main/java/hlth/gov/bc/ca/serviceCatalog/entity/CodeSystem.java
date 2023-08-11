@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package hlth.gov.bc.ca.serviceCatalog.entity;
 
 import java.util.Date;
@@ -22,7 +17,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- *
+ * Entity Class to represent the DB table Code_System, used to define specialty and serviceType code sets 
  * @author camille.estival
  */
 @Entity
