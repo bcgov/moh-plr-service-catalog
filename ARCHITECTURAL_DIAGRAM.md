@@ -1,13 +1,13 @@
 # Architectural Diagram
 
 ```mermaid
-flowchart LR
+graph LR
   User([Business user])
   Dev([Developer])
-  FE[React frontend\n(Vite dev server)]
-  BE[Spring Boot backend\nJava 17]
-  FHIR[HAPI FHIR servlet\n/ServiceCatalogue/*]
-  REST[REST API\n/api/catalog-services]
+  FE[React frontend<br/>(Vite dev server)]
+  BE[Spring Boot backend<br/>Java 17]
+  FHIR[HAPI FHIR servlet<br/>/ServiceCatalogue/*]
+  REST[REST API<br/>/api/catalog-services]
   DB[(PostgreSQL 18.1)]
 
   User --> FE
