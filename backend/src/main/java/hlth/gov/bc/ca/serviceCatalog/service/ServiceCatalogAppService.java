@@ -2,6 +2,7 @@ package hlth.gov.bc.ca.serviceCatalog.service;
 
 import hlth.gov.bc.ca.serviceCatalog.api.dto.CatalogServiceRequest;
 import hlth.gov.bc.ca.serviceCatalog.api.dto.CatalogServiceResponse;
+import hlth.gov.bc.ca.serviceCatalog.api.dto.SystemOfOriginResponse;
 import hlth.gov.bc.ca.serviceCatalog.entity.ServiceCatalog;
 import hlth.gov.bc.ca.serviceCatalog.entity.SystemOfOrigin;
 import hlth.gov.bc.ca.serviceCatalog.repository.ServiceCatalogRepository;
@@ -10,7 +11,6 @@ import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -36,6 +36,16 @@ public class ServiceCatalogAppService {
         return serviceCatalogRepository.findAll()
                 .stream()
                 .map(this::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    public List<SystemOfOriginResponse> listSystems() {
+        return systemOfOriginRepository.findAll()
+                .stream()
+                .map(system -> new SystemOfOriginResponse(
+                        system.getSystemId(),
+                        system.getCode(),
+                        system.getDescription()))
                 .collect(Collectors.toList());
     }
     

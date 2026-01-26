@@ -2,6 +2,7 @@ package hlth.gov.bc.ca.serviceCatalog.api;
 
 import hlth.gov.bc.ca.serviceCatalog.api.dto.CatalogServiceRequest;
 import hlth.gov.bc.ca.serviceCatalog.api.dto.CatalogServiceResponse;
+import hlth.gov.bc.ca.serviceCatalog.api.dto.SystemOfOriginResponse;
 import hlth.gov.bc.ca.serviceCatalog.service.ServiceCatalogAppService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -28,6 +29,11 @@ public class ServiceCatalogController {
     @GetMapping
     public List<CatalogServiceResponse> listServices() {
         return serviceCatalogAppService.listServices();
+    }
+
+    @GetMapping("/systems")
+    public List<SystemOfOriginResponse> listSystems() {
+        return serviceCatalogAppService.listSystems();
     }
     
     @PostMapping

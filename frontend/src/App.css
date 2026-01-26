@@ -85,7 +85,8 @@
   color: #2f281f;
 }
 
-.form-grid input {
+.form-grid input,
+.form-grid select {
   border: 1px solid #d4c6b9;
   border-radius: 10px;
   padding: 10px 12px;

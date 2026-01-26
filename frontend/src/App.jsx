@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { createService, deleteService, listServices } from './api/serviceCatalog'
+import { createService, deleteService, listServices, listSystems } from './api/serviceCatalog'
 import './App.css'
 
 function App() {
@@ -14,6 +14,7 @@ function App() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [apiUnavailable, setApiUnavailable] = useState(false)
+  const [systems, setSystems] = useState([])
   const canSubmit = useMemo(
     () =>
       form.name.trim().length > 0 &&
@@ -58,7 +59,17 @@ function App() {
 
   useEffect(() => {
     void loadServices()
+    void loadSystems()
   }, [])
+
+  async function loadSystems() {
+    try {
+      const data = await listSystems()
+      setSystems(Array.isArray(data) ? data : [])
+    } catch (err) {
+      handleError(err, 'Failed to load system codes.')
+    }
+  }
 
   function handleChange(event) {
     const { name, value } = event.target
@@ -174,12 +185,18 @@ function App() {
           </label>
           <label>
             System code
-            <input
+            <select
               name="systemCode"
               value={form.systemCode}
               onChange={handleChange}
-              placeholder="PHSA"
-            />
+            >
+              <option value="">Select a system</option>
+              {systems.map((system) => (
+                <option key={system.id ?? system.code} value={system.code}>
+                  {system.code} {system.description ? `- ${system.description}` : ''}
+                </option>
+              ))}
+            </select>
           </label>
           <label>
             Parent logical ID
