@@ -84,3 +84,6 @@ VITE_API_BASE_URL=http://localhost:8080
 
 ## For business users
 Use the React frontend to add and remove catalog services through the backend API.
+
+
+
