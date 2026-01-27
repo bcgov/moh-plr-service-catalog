@@ -124,3 +124,11 @@
 2026-01-27 13:53:42.894 INFO  [http-nio-8080-exec-1] h.g.b.c.s.a.ServiceCatalogController - Listing system of origin codes
 2026-01-27 13:53:42.910 INFO  [http-nio-8080-exec-3] h.g.b.c.s.a.ServiceCatalogController - Listing catalog services
 2026-01-27 13:53:46.146 INFO  [http-nio-8080-exec-1] h.g.b.c.s.a.ServiceCatalogController - Listing catalog services
+2026-01-27 13:55:36.930 INFO  [http-nio-8080-exec-8] h.g.b.c.s.a.ServiceCatalogController - Listing catalog services
+2026-01-27 13:55:36.930 INFO  [http-nio-8080-exec-6] h.g.b.c.s.a.ServiceCatalogController - Listing system of origin codes
+2026-01-27 13:55:36.936 INFO  [http-nio-8080-exec-2] h.g.b.c.s.a.ServiceCatalogController - Listing system of origin codes
+2026-01-27 13:55:36.947 INFO  [http-nio-8080-exec-9] h.g.b.c.s.a.ServiceCatalogController - Listing catalog services
+2026-01-27 13:57:11.940 INFO  [http-nio-8080-exec-6] h.g.b.c.s.a.ServiceCatalogController - Listing system of origin codes
+2026-01-27 13:57:11.940 INFO  [http-nio-8080-exec-2] h.g.b.c.s.a.ServiceCatalogController - Listing catalog services
+2026-01-27 13:57:11.945 INFO  [http-nio-8080-exec-8] h.g.b.c.s.a.ServiceCatalogController - Listing system of origin codes
+2026-01-27 13:57:11.955 INFO  [http-nio-8080-exec-1] h.g.b.c.s.a.ServiceCatalogController - Listing catalog services

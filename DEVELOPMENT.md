@@ -54,6 +54,14 @@ To override, create `frontend/.env`:
 VITE_API_BASE_URL=http://localhost:8080
 ```
 
+### Frontend views
+- Catalog Services: create and remove catalog services.
+- Code System Data Entry: create, edit, and delete entries in `code_system`.
+
+### Client log ingestion
+- `POST /api/client-logs` writes client events to `./logs/plr_catalog_frontend.logs`.
+- Logback rotates the file daily in `./logs/archived`.
+
 ## Troubleshooting
 - Backend port already in use: stop the existing process or change `server.port` in `backend/src/main/resources/application.yml`.
 - API errors in frontend: confirm backend is running and reachable at `http://localhost:8080`.

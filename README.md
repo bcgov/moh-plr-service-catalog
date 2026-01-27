@@ -21,6 +21,8 @@ mvn -f backend/pom.xml spring-boot:run
 
 The backend exposes:
 - REST API for the frontend at `/api/catalog-services`
+- REST API for code system maintenance at `/api/code-systems`
+- REST API for client log ingestion at `/api/client-logs`
 - HAPI FHIR endpoint at `/ServiceCatalogue/*`
 
 The backend uses local dev defaults in `backend/src/main/resources/application.yml`:
@@ -76,6 +78,11 @@ The dev server proxies `/api` to `http://localhost:8080` and expects:
 - `GET /api/catalog-services`
 - `POST /api/catalog-services`
 - `DELETE /api/catalog-services/{logicalId}`
+- `GET /api/code-systems`
+- `POST /api/code-systems`
+- `PUT /api/code-systems/{codeSystemId}`
+- `DELETE /api/code-systems/{codeSystemId}`
+- `POST /api/client-logs`
 
 To override the API base URL, create `frontend/.env`:
 ```
@@ -84,6 +91,12 @@ VITE_API_BASE_URL=http://localhost:8080
 
 ## For business users
 Use the React frontend to add and remove catalog services through the backend API.
+
+## Recent updates
+- Added Code System data entry UI with create, edit, and delete capabilities.
+- Added `/api/code-systems` backend endpoints and persistence for code_system entries.
+- Added `/api/client-logs` endpoint that writes client logs to `./logs/plr_catalog_frontend.logs`.
+- Introduced responsive layouts for phones, tablets, and larger screens, including stacked-card tables on mobile.
 
 
 

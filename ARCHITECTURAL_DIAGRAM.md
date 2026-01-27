@@ -7,7 +7,7 @@ graph LR
   FE[React frontend<br/>(Vite dev server)]
   BE[Spring Boot backend<br/>Java 17]
   FHIR[HAPI FHIR servlet<br/>/ServiceCatalogue/*]
-  REST[REST API<br/>/api/catalog-services]
+  REST[REST API<br/>/api/catalog-services<br/>/api/code-systems<br/>/api/client-logs]
   DB[(PostgreSQL 18.1)]
 
   User --> FE
