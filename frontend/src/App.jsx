@@ -489,7 +489,9 @@ function CodeSystemDataEntryView() {
             <div className="table-row code-system-row" key={system.id ?? system.codeSystemId}>
               <span data-label="ID">{system.id ?? system.codeSystemId ?? '--'}</span>
               <span data-label="Description">{system.description ?? '--'}</span>
-              <span data-label="Lookup URL">{system.systemUrl ?? '--'}</span>
+              <span className="cell-url" data-label="Lookup URL">
+                {system.systemUrl ?? '--'}
+              </span>
               <span data-label="Start">{system.startDate ?? '--'}</span>
               <span data-label="End">{system.endDate ?? '--'}</span>
               <span className="action-group">

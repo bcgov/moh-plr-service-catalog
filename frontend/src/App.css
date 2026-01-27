@@ -210,8 +210,14 @@
 }
 
 .table-row.code-system-row {
-  grid-template-columns: 90px 1.4fr 1.2fr 120px 120px 140px;
+  grid-template-columns: 90px 1.4fr minmax(220px, 320px) 120px 120px 140px;
   min-width: 860px;
+}
+
+.cell-url {
+  max-width: 320px;
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
 .table-head {
@@ -341,6 +347,10 @@
   .table-row.code-system-row {
     min-width: 0;
     grid-template-columns: 1fr;
+  }
+
+  .cell-url {
+    max-width: none;
   }
 
   .table-row span {
