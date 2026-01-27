@@ -23,6 +23,21 @@
         </rollingPolicy>
     </appender>
 
+    <appender name="CLIENT_LOGS" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/plr_catalog_frontend.logs</file>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${ARCHIVE_PATH}/plr_catalog_frontend.%d{yyyy-MM-dd}.logs</fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+    </appender>
+
+    <logger name="client-logs" level="debug" additivity="false">
+        <appender-ref ref="CLIENT_LOGS"/>
+    </logger>
+
     <logger name="hlth.gov.bc.ca.serviceCatalog" level="info"/>
 
     <root level="info">

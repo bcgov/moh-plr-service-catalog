@@ -41,3 +41,39 @@ export function deleteService(logicalId) {
 export function listSystems() {
   return request('/api/catalog-services/systems')
 }
+
+export function listCodeSystems() {
+  return request('/api/code-systems')
+}
+
+export function createCodeSystem(payload) {
+  return request('/api/code-systems', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
+}
+
+export function updateCodeSystem(codeSystemId, payload) {
+  return request(`/api/code-systems/${encodeURIComponent(codeSystemId)}`, {
+    method: 'PUT',
+    body: JSON.stringify(payload),
+  })
+}
+
+export function deleteCodeSystem(codeSystemId) {
+  return request(`/api/code-systems/${encodeURIComponent(codeSystemId)}`, {
+    method: 'DELETE',
+  })
+}
+
+export function logClientEvent(level, message, context) {
+  const payload = {
+    message,
+    level,
+    context: context ? JSON.stringify(context) : null,
+  }
+  return request('/api/client-logs', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  }).catch(() => null)
+}
