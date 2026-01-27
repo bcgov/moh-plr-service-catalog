@@ -37,3 +37,7 @@ export function deleteService(logicalId) {
     method: 'DELETE',
   })
 }
+
+export function listSystems() {
+  return request('/api/catalog-services/systems')
+}
