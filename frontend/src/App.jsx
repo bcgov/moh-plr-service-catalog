@@ -9,6 +9,7 @@ import {
   listSystems,
   logClientEvent,
   updateCodeSystem,
+  getServiceCountsBySystemCode,
 } from './api/serviceCatalog'
 import './App.css'
 
@@ -521,7 +522,6 @@ function CodeSystemDataEntryView() {
 
 function TestView() {
   return (
-  // Renders a placeholder view for the Test section in the app.
     <div className="view">
       <section className="panel">
         <p className="eyebrow">Coming soon</p>
@@ -534,11 +534,81 @@ function TestView() {
   )
 }
 
+function CatalogSummaryView() {
+  const [serviceSummary, setServiceSummary] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    async function fetchSummary() {
+      setLoading(true)
+      setError('')
+      try {
+        const data = await getServiceCountsBySystemCode()
+        setServiceSummary(Array.isArray(data) ? data : [])
+      } catch (err) {
+        setError('Failed to load service summary.')
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchSummary()
+  }, [])
+
+  return (
+    <div className="view">
+      <header className="app-header">
+        <div>
+          <p className="eyebrow">PLR Service Catalogue</p>
+          <h1>Service Catalog Summary</h1>
+          <p className="subtitle">
+            Overview of the service catalog. (Add summary content here.)
+          </p>
+        </div>
+      </header>
+      <section className="panel">
+        <h2>Service Summary</h2>
+        <p className="subtitle">Number of services grouped by system code:</p>
+        {loading && <span className="status">Loading...</span>}
+        {error && <p className="error">{error}</p>}
+        <div className="table">
+          <div className="table-row table-head">
+            <span>System Code</span>
+            <span>Service Count</span>
+          </div>
+          {serviceSummary.length === 0 && !loading && (
+            <div className="table-row empty">
+              <span colSpan={2}>No services found.</span>
+            </div>
+          )}
+          {serviceSummary.map((item) => {
+            // Support both 'code' and 'systemCode' property names
+            const systemCode = item.code ?? item.systemCode ?? '--';
+            const count = item.count ?? '--';
+            return (
+              <div className="table-row" key={systemCode}>
+                <span>{systemCode}</span>
+                <span>{count}</span>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+      <section className="panel">
+        <h2>Code System Summary</h2>
+        <p className="subtitle">Summary details about code systems will appear here.</p>
+        {/* Add code system summary stats/details here */}
+      </section>
+    </div>
+  )
+}
+
 function App() {
   const [activeView, setActiveView] = useState('catalog')
   const navItems = [
     { id: 'catalog', label: 'Catalog Services' },
     { id: 'code-system', label: 'Code System Data Entry' },
+    { id: 'catalog-summary', label: 'Catalog Summary' },
     { id: 'test', label: 'Test' },
   ]
 
@@ -567,6 +637,7 @@ function App() {
       <main className="app-content">
         {activeView === 'catalog' && <CatalogServicesView />}
         {activeView === 'code-system' && <CodeSystemDataEntryView />}
+        {activeView === 'catalog-summary' && <CatalogSummaryView />}
         {activeView === 'test' && <TestView />}
       </main>
     </div>

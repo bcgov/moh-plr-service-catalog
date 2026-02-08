@@ -25,6 +25,39 @@ import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class ServiceCatalogAppService {
+        /**
+         * Retrieves the total number of services grouped by system code.
+         * Returns a list of objects with systemCode and count.
+         */
+        @Transactional
+        public List<SystemServiceCount> getServiceCountsBySystemCode() {
+            String sql = "SELECT o.system_cd AS system_code, COUNT(*) AS count " +
+                         "FROM plr_hs_catalog.catalog_service s " +
+                         "JOIN plr_hs_catalog.hs_system_of_origin o ON s.system_id = o.system_id " +
+                         "GROUP BY o.system_cd";
+            List<Object[]> results = entityManager.createNativeQuery(sql).getResultList();
+            return results.stream()
+                .map(row -> new SystemServiceCount(
+                    row[0] != null ? row[0].toString() : "--",
+                    ((Number) row[1]).intValue()))
+                .collect(Collectors.toList());
+        }
+
+        /**
+         * DTO for system code and service count.
+         */
+        public static class SystemServiceCount {
+            private String systemCode;
+            private int count;
+
+            public SystemServiceCount(String systemCode, int count) {
+                this.systemCode = systemCode;
+                this.count = count;
+            }
+
+            public String getSystemCode() { return systemCode; }
+            public int getCount() { return count; }
+        }
     
     private static final Logger log = LoggerFactory.getLogger(ServiceCatalogAppService.class);
 
@@ -140,6 +173,7 @@ public class ServiceCatalogAppService {
         Date startDate = resolveStartDate(request);
         Date endDate = resolveEndDate(request, startDate);
 
+        // Use fully qualified sequence name for code system IDs
         Long codeSystemId = nextVal("PLR_HS_CATALOG.CODE_SYSTEM_SEQ");
         CodeSystem codeSystem = CodeSystem.builder()
                 .codeSystemId(codeSystemId)
