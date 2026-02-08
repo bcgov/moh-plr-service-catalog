@@ -1,3 +1,7 @@
+export function getServiceCountsBySystemCode() {
+  // Use a relative URL so the Vite dev server proxy works in dev, just like other APIs
+  return request('/api/catalog-services/service-counts')
+}
 const API_BASE = import.meta.env.VITE_API_BASE_URL || ''
 
 async function request(path, options = {}) {
