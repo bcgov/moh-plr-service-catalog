@@ -21,6 +21,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/catalog-services")
 public class ServiceCatalogController {
+        @GetMapping("/service-counts")
+        public List<ServiceCatalogAppService.SystemServiceCount> getServiceCountsBySystemCode() {
+            log.info("Listing service counts grouped by system code");
+            return serviceCatalogAppService.getServiceCountsBySystemCode();
+        }
     
     private static final Logger log = LoggerFactory.getLogger(ServiceCatalogController.class);
 

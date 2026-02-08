@@ -31,7 +31,15 @@ public class CodeSystem {
     
     @Id
     @Column(name = "code_system_id")
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(
+      strategy = GenerationType.SEQUENCE,
+      generator = "code_system_seq_gen"
+    )
+    @jakarta.persistence.SequenceGenerator(
+      name = "code_system_seq_gen",
+      sequenceName = "PLR_HS_CATALOG.CODE_SYSTEM_SEQ",
+      allocationSize = 1
+    )
     private Long codeSystemId;
 
     @Column(name = "code_system_desc_txt")
