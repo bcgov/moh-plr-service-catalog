@@ -1,4 +1,7 @@
 # Backend
+backend/logs/*
+/backend/target/*
+/target/
 backend/logs/
 backend/target/
 /log/
@@ -33,3 +36,4 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+classes
