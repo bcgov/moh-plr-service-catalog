@@ -521,6 +521,7 @@ function CodeSystemDataEntryView() {
 
 function TestView() {
   return (
+  // Renders a placeholder view for the Test section in the app.
     <div className="view">
       <section className="panel">
         <p className="eyebrow">Coming soon</p>
