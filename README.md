@@ -16,7 +16,7 @@ Service Catalogue exposes BC Catalogue HealthcareService resources and supports 
 ## Backend (Spring Boot)
 Run the API from the repo root:
 ```bash
-mvn -f backend/pom.xml spring-boot:run
+mvn -f backend/pom.xml spring-boot:run -Dspring-boot.run.arguments=--spring.profiles.active=dev
 ```
 
 The backend exposes:
