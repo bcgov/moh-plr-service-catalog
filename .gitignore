@@ -1,7 +1,11 @@
 # Backend
 backend/logs/
-/target/
+backend/target/
 /log/
+
+# Langchain
+langchain/*
+!langchain/input/
 
 # Logs
 /log/
