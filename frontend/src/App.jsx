@@ -14,13 +14,13 @@ import './App.css'
 
 function NavItem({ label, isActive, onClick }) {
   return (
-    <button
-      className={`nav-item ${isActive ? 'active' : ''}`}
-      type="button"
-      onClick={onClick}
-    >
-      {label}
-    </button>
+      <button
+          className={`nav-item ${isActive ? 'active' : ''}`}
+          type="button"
+          onClick={onClick}
+      >
+        {label}
+      </button>
   )
 }
 
@@ -38,11 +38,11 @@ function CatalogServicesView() {
   const [apiUnavailable, setApiUnavailable] = useState(false)
   const [systems, setSystems] = useState([])
   const canSubmit = useMemo(
-    () =>
-      form.name.trim().length > 0 &&
-      form.description.trim().length > 0 &&
-      form.systemCode.trim().length > 0,
-    [form]
+      () =>
+          form.name.trim().length > 0 &&
+          form.description.trim().length > 0 &&
+          form.systemCode.trim().length > 0,
+      [form]
   )
 
   function friendlyErrorMessage(message) {
@@ -159,135 +159,135 @@ function CatalogServicesView() {
 
   if (apiUnavailable) {
     return (
-      <section className="panel error-card">
-        <p className="eyebrow">Backend offline</p>
-        <h2>Cannot reach backend APIs</h2>
-        <p className="subtitle">
-          The frontend is running but could not connect to the backend API. Start the backend or
-          verify the API base URL, then retry.
-        </p>
-        <button className="primary-button" type="button" onClick={() => loadServices('retry')}>
-          Retry connection
-        </button>
-      </section>
+        <section className="panel error-card">
+          <p className="eyebrow">Backend offline</p>
+          <h2>Cannot reach backend APIs</h2>
+          <p className="subtitle">
+            The frontend is running but could not connect to the backend API. Start the backend or
+            verify the API base URL, then retry.
+          </p>
+          <button className="primary-button" type="button" onClick={() => loadServices('retry')}>
+            Retry connection
+          </button>
+        </section>
     )
   }
 
   return (
-    <div className="view">
-      <header className="app-header">
-        <div>
-          <p className="eyebrow">PLR Service Catalogue</p>
-          <h1>Catalog services</h1>
-          <p className="subtitle">
-            Create and retire catalog services through the backend API.
-          </p>
-        </div>
-        <button className="ghost-button" type="button" onClick={() => loadServices('manual refresh')}>
-          Refresh
-        </button>
-      </header>
-
-      <section className="panel">
-        <h2>Add a service</h2>
-        <form className="form-grid" onSubmit={handleSubmit}>
-          <label>
-            Name
-            <input
-              name="name"
-              value={form.name}
-              onChange={handleChange}
-              placeholder="MRI"
-            />
-          </label>
-          <label>
-            Description
-            <input
-              name="description"
-              value={form.description}
-              onChange={handleChange}
-              placeholder="Magnetic Resonance Imaging"
-            />
-          </label>
-          <label>
-            External identifier
-            <input
-              name="externalIdentifier"
-              value={form.externalIdentifier}
-              onChange={handleChange}
-              placeholder="MRI"
-            />
-          </label>
-          <label>
-            System code
-            <select
-              name="systemCode"
-              value={form.systemCode}
-              onChange={handleChange}
-            >
-              <option value="">Select a system</option>
-              {systems.map((system) => (
-                <option key={system.id ?? system.code} value={system.code}>
-                  {system.code} {system.description ? `- ${system.description}` : ''}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            Parent logical ID
-            <input
-              name="parentLogicalId"
-              value={form.parentLogicalId}
-              onChange={handleChange}
-              placeholder="Optional"
-            />
-          </label>
-          <button className="primary-button" type="submit" disabled={!canSubmit || loading}>
-            Add service
-          </button>
-        </form>
-        {error && <p className="error">{error}</p>}
-      </section>
-
-      <section className="panel">
-        <div className="panel-header">
-          <h2>Services</h2>
-          {loading && <span className="status">Updating</span>}
-        </div>
-        <div className="table">
-          <div className="table-row table-head">
-            <span>Logical ID</span>
-            <span>Name</span>
-            <span>System</span>
-            <span>External ID</span>
-            <span>Actions</span>
+      <div className="view">
+        <header className="app-header">
+          <div>
+            <p className="eyebrow">PLR Service Catalogue</p>
+            <h1>Catalog services</h1>
+            <p className="subtitle">
+              Create and retire catalog services through the backend API.
+            </p>
           </div>
-          {services.length === 0 && !loading && (
-            <div className="table-row empty">
-              <span>No services returned yet.</span>
+          <button className="ghost-button" type="button" onClick={() => loadServices('manual refresh')}>
+            Refresh
+          </button>
+        </header>
+
+        <section className="panel">
+          <h2>Add a service</h2>
+          <form className="form-grid" onSubmit={handleSubmit}>
+            <label>
+              Name
+              <input
+                  name="name"
+                  value={form.name}
+                  onChange={handleChange}
+                  placeholder="MRI"
+              />
+            </label>
+            <label>
+              Description
+              <input
+                  name="description"
+                  value={form.description}
+                  onChange={handleChange}
+                  placeholder="Magnetic Resonance Imaging"
+              />
+            </label>
+            <label>
+              External identifier
+              <input
+                  name="externalIdentifier"
+                  value={form.externalIdentifier}
+                  onChange={handleChange}
+                  placeholder="MRI"
+              />
+            </label>
+            <label>
+              System code
+              <select
+                  name="systemCode"
+                  value={form.systemCode}
+                  onChange={handleChange}
+              >
+                <option value="">Select a system</option>
+                {systems.map((system) => (
+                    <option key={system.id ?? system.code} value={system.code}>
+                      {system.code} {system.description ? `- ${system.description}` : ''}
+                    </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              Parent service ID
+              <input
+                  name="parentLogicalId"
+                  value={form.parentLogicalId}
+                  onChange={handleChange}
+                  placeholder="Optional"
+              />
+            </label>
+            <button className="primary-button" type="submit" disabled={!canSubmit || loading}>
+              Add service
+            </button>
+          </form>
+          {error && <p className="error">{error}</p>}
+        </section>
+
+        <section className="panel">
+          <div className="panel-header">
+            <h2>Services</h2>
+            {loading && <span className="status">Updating</span>}
+          </div>
+          <div className="table">
+            <div className="table-row table-head">
+              <span>Logical ID</span>
+              <span>Name</span>
+              <span>System</span>
+              <span>External ID</span>
+              <span>Actions</span>
             </div>
-          )}
-          {services.map((service) => (
-            <div className="table-row" key={service.logicalId ?? service.id ?? service.serviceId}>
-              <span data-label="Logical ID">{service.logicalId ?? '--'}</span>
-              <span data-label="Name">{service.name ?? '--'}</span>
-              <span data-label="System">{service.systemCode ?? service.system?.code ?? '--'}</span>
-              <span data-label="External ID">{service.externalIdentifier ?? '--'}</span>
-              <span>
+            {services.length === 0 && !loading && (
+                <div className="table-row empty">
+                  <span>No services returned yet.</span>
+                </div>
+            )}
+            {services.map((service) => (
+                <div className="table-row" key={service.logicalId ?? service.id ?? service.serviceId}>
+                  <span data-label="Logical ID">{service.logicalId ?? '--'}</span>
+                  <span data-label="Name">{service.name ?? '--'}</span>
+                  <span data-label="System">{service.systemCode ?? service.system?.code ?? '--'}</span>
+                  <span data-label="External ID">{service.externalIdentifier ?? '--'}</span>
+                  <span>
                 <button
-                  className="ghost-button"
-                  type="button"
-                  onClick={() => handleDelete(service.logicalId)}
-                  disabled={!service.logicalId || loading}
+                    className="ghost-button"
+                    type="button"
+                    onClick={() => handleDelete(service.logicalId)}
+                    disabled={!service.logicalId || loading}
                 >
                   Remove
                 </button>
               </span>
-            </div>
-          ))}
-        </div>
-      </section>
-    </div>
+                </div>
+            ))}
+          </div>
+        </section>
+      </div>
   )
 }
 
@@ -304,8 +304,8 @@ function CodeSystemDataEntryView() {
   const [error, setError] = useState('')
 
   const canSubmit = useMemo(
-    () => form.description.trim().length > 0 && form.startDate.trim().length > 0,
-    [form]
+      () => form.description.trim().length > 0 && form.startDate.trim().length > 0,
+      [form]
   )
 
   function todayIso() {
@@ -399,138 +399,138 @@ function CodeSystemDataEntryView() {
   }
 
   return (
-    <div className="view">
-      <header className="app-header">
-        <div>
-          <p className="eyebrow">PLR Service Catalogue</p>
-          <h1>Code system data entry</h1>
-          <p className="subtitle">
-            Maintain the code systems used for specialty and service type lookups.
-          </p>
-        </div>
-        <button className="ghost-button" type="button" onClick={loadCodeSystems}>
-          Refresh
-        </button>
-      </header>
+      <div className="view">
+        <header className="app-header">
+          <div>
+            <p className="eyebrow">PLR Service Catalogue</p>
+            <h1>Code system data entry</h1>
+            <p className="subtitle">
+              Maintain the code systems used for specialty and service type lookups.
+            </p>
+          </div>
+          <button className="ghost-button" type="button" onClick={loadCodeSystems}>
+            Refresh
+          </button>
+        </header>
 
-      <section className="panel">
-        <h2>{editingId ? 'Edit code system' : 'Add a code system'}</h2>
-        <form className="form-grid" onSubmit={handleSubmit}>
-          <label>
-            Description
-            <input
-              name="description"
-              value={form.description}
-              onChange={handleChange}
-              placeholder="SNOMED CT"
-            />
-          </label>
-          <label>
-            Lookup URL
-            <input
-              name="systemUrl"
-              value={form.systemUrl}
-              onChange={handleChange}
-              placeholder="https://example.org"
-            />
-          </label>
-          <label>
-            Start date
-            <input
-              type="date"
-              name="startDate"
-              value={form.startDate}
-              onChange={handleChange}
-            />
-          </label>
-          <label>
-            End date
-            <input
-              type="date"
-              name="endDate"
-              value={form.endDate}
-              onChange={handleChange}
-            />
-          </label>
-          <div className="form-actions">
-            <button className="primary-button" type="submit" disabled={!canSubmit || loading}>
-              {editingId ? 'Save changes' : 'Add code system'}
-            </button>
-            {editingId && (
-              <button className="ghost-button" type="button" onClick={resetForm}>
-                Cancel edit
+        <section className="panel">
+          <h2>{editingId ? 'Edit code system' : 'Add a code system'}</h2>
+          <form className="form-grid" onSubmit={handleSubmit}>
+            <label>
+              Description
+              <input
+                  name="description"
+                  value={form.description}
+                  onChange={handleChange}
+                  placeholder="SNOMED CT"
+              />
+            </label>
+            <label>
+              Lookup URL
+              <input
+                  name="systemUrl"
+                  value={form.systemUrl}
+                  onChange={handleChange}
+                  placeholder="https://example.org"
+              />
+            </label>
+            <label>
+              Start date
+              <input
+                  type="date"
+                  name="startDate"
+                  value={form.startDate}
+                  onChange={handleChange}
+              />
+            </label>
+            <label>
+              End date
+              <input
+                  type="date"
+                  name="endDate"
+                  value={form.endDate}
+                  onChange={handleChange}
+              />
+            </label>
+            <div className="form-actions">
+              <button className="primary-button" type="submit" disabled={!canSubmit || loading}>
+                {editingId ? 'Save changes' : 'Add code system'}
               </button>
-            )}
-          </div>
-        </form>
-        {error && <p className="error">{error}</p>}
-      </section>
-
-      <section className="panel">
-        <div className="panel-header">
-          <h2>Code systems</h2>
-          {loading && <span className="status">Updating</span>}
-        </div>
-        <div className="table">
-          <div className="table-row table-head code-system-row">
-            <span>ID</span>
-            <span>Description</span>
-            <span>Lookup URL</span>
-            <span>Start</span>
-            <span>End</span>
-            <span>Actions</span>
-          </div>
-          {codeSystems.length === 0 && !loading && (
-            <div className="table-row empty">
-              <span>No code systems returned yet.</span>
+              {editingId && (
+                  <button className="ghost-button" type="button" onClick={resetForm}>
+                    Cancel edit
+                  </button>
+              )}
             </div>
-          )}
-          {codeSystems.map((system) => (
-            <div className="table-row code-system-row" key={system.id ?? system.codeSystemId}>
-              <span data-label="ID">{system.id ?? system.codeSystemId ?? '--'}</span>
-              <span data-label="Description">{system.description ?? '--'}</span>
-              <span className="cell-url" data-label="Lookup URL">
+          </form>
+          {error && <p className="error">{error}</p>}
+        </section>
+
+        <section className="panel">
+          <div className="panel-header">
+            <h2>Code systems</h2>
+            {loading && <span className="status">Updating</span>}
+          </div>
+          <div className="table">
+            <div className="table-row table-head code-system-row">
+              <span>ID</span>
+              <span>Description</span>
+              <span>Lookup URL</span>
+              <span>Start</span>
+              <span>End</span>
+              <span>Actions</span>
+            </div>
+            {codeSystems.length === 0 && !loading && (
+                <div className="table-row empty">
+                  <span>No code systems returned yet.</span>
+                </div>
+            )}
+            {codeSystems.map((system) => (
+                <div className="table-row code-system-row" key={system.id ?? system.codeSystemId}>
+                  <span data-label="ID">{system.id ?? system.codeSystemId ?? '--'}</span>
+                  <span data-label="Description">{system.description ?? '--'}</span>
+                  <span className="cell-url" data-label="Lookup URL">
                 {system.systemUrl ?? '--'}
               </span>
-              <span data-label="Start">{system.startDate ?? '--'}</span>
-              <span data-label="End">{system.endDate ?? '--'}</span>
-              <span className="action-group">
+                  <span data-label="Start">{system.startDate ?? '--'}</span>
+                  <span data-label="End">{system.endDate ?? '--'}</span>
+                  <span className="action-group">
                 <button
-                  className="ghost-button"
-                  type="button"
-                  onClick={() => handleEdit(system)}
+                    className="ghost-button"
+                    type="button"
+                    onClick={() => handleEdit(system)}
                 >
                   Edit
                 </button>
                 <button
-                  className="ghost-button"
-                  type="button"
-                  onClick={() => handleDelete(system.id ?? system.codeSystemId)}
-                  disabled={loading}
+                    className="ghost-button"
+                    type="button"
+                    onClick={() => handleDelete(system.id ?? system.codeSystemId)}
+                    disabled={loading}
                 >
                   Remove
                 </button>
               </span>
-            </div>
-          ))}
-        </div>
-      </section>
-    </div>
+                </div>
+            ))}
+          </div>
+        </section>
+      </div>
   )
 }
 
 function TestView() {
   return (
-  // Renders a placeholder view for the Test section in the app.
-    <div className="view">
-      <section className="panel">
-        <p className="eyebrow">Coming soon</p>
-        <h2>Test</h2>
-        <p className="subtitle">
-          Placeholder view for the Test section.
-        </p>
-      </section>
-    </div>
+      // Renders a placeholder view for the Test section in the app.
+      <div className="view">
+        <section className="panel">
+          <p className="eyebrow">Coming soon</p>
+          <h2>Test</h2>
+          <p className="subtitle">
+            Placeholder view for the Test section.
+          </p>
+        </section>
+      </div>
   )
 }
 
@@ -543,33 +543,33 @@ function App() {
   ]
 
   return (
-    <div className="app-shell">
-      <header className="top-bar">
-        <div className="brand">
-          <p className="eyebrow">PLR Service Catalogue</p>
-          <span className="brand-title">Service Catalog</span>
-        </div>
-        <nav className="nav">
-          {navItems.map((item) => (
-            <NavItem
-              key={item.id}
-              label={item.label}
-              isActive={activeView === item.id}
-              onClick={() => {
-                setActiveView(item.id)
-                void logClientEvent('debug', 'Navigation changed', { view: item.id })
-              }}
-            />
-          ))}
-        </nav>
-      </header>
+      <div className="app-shell">
+        <header className="top-bar">
+          <div className="brand">
+            <p className="eyebrow">PLR Service Catalogue</p>
+            <span className="brand-title">Service Catalog</span>
+          </div>
+          <nav className="nav">
+            {navItems.map((item) => (
+                <NavItem
+                    key={item.id}
+                    label={item.label}
+                    isActive={activeView === item.id}
+                    onClick={() => {
+                      setActiveView(item.id)
+                      void logClientEvent('debug', 'Navigation changed', { view: item.id })
+                    }}
+                />
+            ))}
+          </nav>
+        </header>
 
-      <main className="app-content">
-        {activeView === 'catalog' && <CatalogServicesView />}
-        {activeView === 'code-system' && <CodeSystemDataEntryView />}
-        {activeView === 'test' && <TestView />}
-      </main>
-    </div>
+        <main className="app-content">
+          {activeView === 'catalog' && <CatalogServicesView />}
+          {activeView === 'code-system' && <CodeSystemDataEntryView />}
+          {activeView === 'test' && <TestView />}
+        </main>
+      </div>
   )
 }
 
